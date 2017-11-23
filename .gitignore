@@ -1,0 +1,12 @@
+*.class
+
+# Package Files #
+*.war
+*.ear
+/bin/
+.DS_Store
+
+.classpath
+.project
+.idea
+
