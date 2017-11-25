@@ -533,9 +533,13 @@ public class StockManagerTest {
 		set2.add(book2);
 		set2.add(book3);
 		set2.add(book4);
+		storeManager.addBooks(set2);
+
 
 		List<StockBook> demand2 = storeManager.getBooksInDemand();
 		assertTrue(demand2.size() == 3);
+		set2.remove(book3);
+		set2.add(book1);
 		assertTrue(demand2.containsAll(set2));
 	}
 

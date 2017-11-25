@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
@@ -372,7 +373,10 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-		throw new BookStoreException();
+		return bookMap.values().stream()
+				.filter(BookStoreBook::hadSaleMiss)
+				.map(b -> new ImmutableStockBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice(), b.getNumCopies(), b.getNumSaleMisses(), b.getNumTimesRated(), b.getTotalRating(), b.isEditorPick()))
+				.collect(Collectors.toList());
 	}
 
 	/*
