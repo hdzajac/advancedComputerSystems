@@ -106,10 +106,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				addBooks(request, response);
 				break;
 
-			case ADDCOPIES:
-				addCopies(request, response);
-				break;
-
 			case LISTBOOKS:
 				listBooks(response);
 				break;
@@ -127,15 +123,11 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				break;
 
 			case GETBOOKSINDEMAND:
-				getBooksInDemand(request, response);
+				getBooksInDemand(response);
 				break;
 
 			case GETEDITORPICKS:
 				getEditorPicks(request, response);
-				break;
-
-			case GETINDEMANDBOOKS:
-				getInDemandBooks(response);
 				break;
 
 			case GETSTOCKBOOKSBYISBN:
@@ -150,25 +142,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		// Mark the request as handled so that the HTTP response can be sent
 		baseRequest.setHandled(true);
-	}
-
-	/**
-	 * Gets the books in demand
-
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void getInDemandBooks(HttpServletResponse response) throws IOException {
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-		try {
-			bookStoreResponse.setList(myBookStore.getBooksInDemand());
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
 	}
 
 	/**
@@ -253,17 +226,13 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	/**
 	 * Gets the books in demand.
 	 *
-	 * @param request
-	 *            the request
 	 * @param response
 	 *            the response
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	@SuppressWarnings("unchecked")
-	private void getBooksInDemand(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		//byte[] serializedRequestContent = getSerializedRequestContent(request);
-
+	private void getBooksInDemand(HttpServletResponse response) throws IOException {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
