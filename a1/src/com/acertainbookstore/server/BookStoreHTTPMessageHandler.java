@@ -125,6 +125,10 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				getEditorPicks(request, response);
 				break;
 
+			case GETINDEMANDBOOKS:
+				getInDemandBooks(response);
+				break;
+
 			case GETSTOCKBOOKSBYISBN:
 				getStockBooksByISBN(request, response);
 				break;
@@ -137,6 +141,25 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		// Mark the request as handled so that the HTTP response can be sent
 		baseRequest.setHandled(true);
+	}
+
+	/**
+	 * Gets the books in demand
+
+	 * @param response
+	 *            the response
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	private void getInDemandBooks(HttpServletResponse response) throws IOException {
+		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+		try {
+			bookStoreResponse.setList(myBookStore.getBooksInDemand());
+		} catch (BookStoreException ex) {
+			bookStoreResponse.setException(ex);
+		}
+		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+		response.getOutputStream().write(serializedResponseContent);
 	}
 
 	/**
