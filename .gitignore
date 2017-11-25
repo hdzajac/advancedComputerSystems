@@ -10,3 +10,7 @@
 .project
 .idea
 
+/a1/.idea
+/a1/.project
+/a1/.classpath
+
