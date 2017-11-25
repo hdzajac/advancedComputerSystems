@@ -86,6 +86,11 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 			System.err.println("No message tag.");
 		} else {
 			switch (messageTag) {
+
+			case ADDCOPIES:
+				addCopies(request, response);
+				break;
+
 			case REMOVEBOOKS:
 				removeBooks(request, response);
 				break;
