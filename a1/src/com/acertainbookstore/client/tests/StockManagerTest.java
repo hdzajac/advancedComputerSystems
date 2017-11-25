@@ -476,6 +476,74 @@ public class StockManagerTest {
 	}
 
 	/**
+	 * Tests getBooksInDemand functionality.
+	 *
+	 * Empty response
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksInDemandEmptyResponse() throws BookStoreException {
+		Set<StockBook> set1 = new HashSet<StockBook>();
+		set1.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		set1.add(new ImmutableStockBook(TEST_ISBN + 3, "The Art of Life", "Hubert Zajac",
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
+		set1.add(new ImmutableStockBook(TEST_ISBN + 4, "The Art of Death",
+				"Hubert Zajac", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		storeManager.addBooks(set1);
+
+		List<StockBook> demand1 = storeManager.getBooksInDemand();
+		assertTrue(demand1.size() == 0);
+	}
+
+	/**
+	 * Tests getBooksInDemand functionality.
+	 *
+	 * Not Empty response
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksInDemandNotEmpty() throws BookStoreException {
+		Set<StockBook> set1 = new HashSet<StockBook>();
+		Set<StockBook> set2 = new HashSet<StockBook>();
+
+		ImmutableStockBook book1 = new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 2, 0, 0, false);
+		set1.add(book1);
+		storeManager.addBooks(set1);
+
+		List<StockBook> demand1 = storeManager.getBooksInDemand();
+		assertTrue(demand1.size() == 1);
+		assertEquals(demand1.get(0), book1);
+
+
+
+		ImmutableStockBook book2 = new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 15, 0, 0, false);
+		ImmutableStockBook book3 = new ImmutableStockBook(TEST_ISBN + 3, "The Art of Life", "Hubert Zajac",
+				(float) 300, NUM_COPIES, 0, 0, 0, false);
+		ImmutableStockBook book4 = new ImmutableStockBook(TEST_ISBN + 4, "The Art of Death",
+				"Hubert Zajac", (float) 50, NUM_COPIES, 3, 0, 0, false);
+
+
+		set2.add(book2);
+		set2.add(book3);
+		set2.add(book4);
+		storeManager.addBooks(set2);
+
+
+		List<StockBook> demand2 = storeManager.getBooksInDemand();
+		assertTrue(demand2.size() == 3);
+		set2.remove(book3);
+		set2.add(book1);
+		assertTrue(demand2.containsAll(set2));
+	}
+
+	/**
 	 * Tear down after class.
 	 *
 	 * @throws BookStoreException
