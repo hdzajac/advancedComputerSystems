@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
@@ -373,10 +372,21 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-		return bookMap.values().stream()
-				.filter(BookStoreBook::hadSaleMiss)
-				.map(b -> new ImmutableStockBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice(), b.getNumCopies(), b.getNumSaleMisses(), b.getNumTimesRated(), b.getTotalRating(), b.isEditorPick()))
-				.collect(Collectors.toList());
+		//throw new BookStoreException();
+
+		List<StockBook> listBooks = new ArrayList<>();
+
+		for (Map.Entry<Integer, BookStoreBook> book : bookMap.entrySet())
+		{
+		    //Integer isbn = book.getKey();
+		    BookStoreBook b = book.getValue();
+		    
+		    if(b.getNumSaleMisses() > 0)
+		    	listBooks.add(b.immutableStockBook());
+		}
+
+		return listBooks;
+
 	}
 
 	/*
@@ -386,41 +396,7 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized void rateBooks(Set<BookRating> bookRating) throws BookStoreException {
-		if (bookRating == null) {
-			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
-		}
-
-		// Check that all ISBNs that we rate are there first.
-		int isbn;
-		int rating;
-		BookStoreBook book;
-
-		Map<Integer, Integer> salesMisses = new HashMap<>();
-
-		for (BookRating bookToRate : bookRating) {
-			isbn = bookToRate.getISBN();
-			rating = bookToRate.getRating();
-			if (BookStoreUtility.isInvalidISBN(isbn)) {
-				throw new BookStoreException(BookStoreConstants.ISBN + isbn + BookStoreConstants.INVALID);
-			}
-
-			if (rating < 0 || rating > 5) {
-				throw new BookStoreException(BookStoreConstants.RATING + rating + BookStoreConstants.INVALID);
-			}
-
-			if (!bookMap.containsKey(isbn)) {
-				throw new BookStoreException(BookStoreConstants.ISBN + isbn + BookStoreConstants.NOT_AVAILABLE);
-			}
-
-			book = bookMap.get(isbn);
-
-		}
-
-		// Then make the purchase.
-		for (BookRating bookR : bookRating) {
-			book = bookMap.get(bookR.getISBN());
-			book.addRating(bookR.getRating());
-		}
+		throw new BookStoreException();
 	}
 
 	/*
