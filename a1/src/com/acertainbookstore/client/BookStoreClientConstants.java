@@ -1,7 +1,5 @@
 package com.acertainbookstore.client;
 
-import com.acertainbookstore.business.CertainBookStore;
-
 /**
  * {@link BookStoreClientConstants} stores the constants used by the
  * {@link CertainBookStore} proxy and client classes.
