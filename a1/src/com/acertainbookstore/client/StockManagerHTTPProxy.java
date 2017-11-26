@@ -3,9 +3,13 @@ package com.acertainbookstore.client;
 import java.util.List;
 import java.util.Set;
 
+import com.acertainbookstore.business.CertainBookStore;
+import com.acertainbookstore.business.ImmutableBook;
+
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
+import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookEditorPick;
 import com.acertainbookstore.business.StockBook;
@@ -127,8 +131,6 @@ public class StockManagerHTTPProxy implements StockManager {
 				serializer.get());
 		return (List<StockBook>) bookStoreResponse.getList();
 	}
-	
-	
 
 	/*
 	 * (non-Javadoc)
@@ -151,12 +153,14 @@ public class StockManagerHTTPProxy implements StockManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StockBook> getBooksInDemand() throws BookStoreException {
-		String urlString = serverAddress + "/" + BookStoreMessageTag.GETBOOKSINDEMAND;
+		String urlString = serverAddress + "/" + BookStoreMessageTag.GETINDEMANDBOOKS;
 		BookStoreRequest bookStoreRequest = BookStoreRequest.newGetRequest(urlString);
 		BookStoreResponse bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest,
 				serializer.get());
 		return (List<StockBook>) bookStoreResponse.getList();
 	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -211,4 +215,6 @@ public class StockManagerHTTPProxy implements StockManager {
 			System.err.println(ex.getStackTrace());
 		}
 	}
+
+
 }

@@ -15,8 +15,10 @@ import org.junit.Test;
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.CertainBookStore;
+import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
+import com.acertainbookstore.business.BookRating;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
 import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
@@ -292,33 +294,33 @@ public class BookStoreTest {
 	}
 	
 	/**
-	 * Tests that all books can be retrieved.
+	 * Tests top rated books returning.
 	 *
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	@Test
-	public void testGetBooksInDemand() throws BookStoreException {
+	public void testGetTopRatedBooks() throws BookStoreException {
+		int rating = 5, num = 2;
+		
 		Set<StockBook> booksAdded = new HashSet<StockBook>();
 		booksAdded.add(getDefaultBook());
 
-		Set<StockBook> booksInDemand = new HashSet<StockBook>();
-		Set<StockBook> booksNotInDemand = new HashSet<StockBook>();
-		
 		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		Set<ImmutableBook> topRated = new HashSet<ImmutableBook>();
+		
+		
+		
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
-				(float) 300, NUM_COPIES, 10, 0, 0, false));
-		booksInDemand.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
-				(float) 300, NUM_COPIES, 10, 0, 0, false));
-		
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
-				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 50, 0, 0, false));
-		booksInDemand.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
-				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 50, 0, 0, false));
-		
-		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 3, "The C++ Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		booksNotInDemand.add(new ImmutableStockBook(TEST_ISBN + 3, "The C++ Programming Language",
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 3, "The CPP Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		topRated.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		topRated.add(new ImmutableStockBook(TEST_ISBN + 3, "The CPP Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 
 		
@@ -326,11 +328,24 @@ public class BookStoreTest {
 
 		storeManager.addBooks(booksToAdd);
 
-		// Get books in store.
-		List<StockBook> listBooks = storeManager.getBooksInDemand();
+		
+		// Set of books to rate
+		HashSet<BookRating> ratingList = new HashSet<BookRating>();
+		ratingList.add(new BookRating(TEST_ISBN+1,0));
+		ratingList.add(new BookRating(TEST_ISBN+2,3));
+		ratingList.add(new BookRating(TEST_ISBN+3,5));
 
+		// Try to rate books
+		client.rateBooks(ratingList);
+
+
+		// Get books in store.
+		//List<ImmutableBook> listBooks = storeManager.getTopRatedBooks(num);
+		List<ImmutableBook> listBooks = client.getTopRatedBooks(num);
+
+		
 		// Make sure the lists equal each other.
-		assertTrue(listBooks.containsAll(booksInDemand) && listBooks.size() == booksInDemand.size());
+		assertTrue(listBooks.containsAll(topRated) && listBooks.size() == topRated.size());
 	}
 
 	/**
@@ -390,6 +405,168 @@ public class BookStoreTest {
 		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
+
+	/**
+	 * Tests basic rateBooks() functionality.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRateExistingBook() throws BookStoreException {
+
+		int rating = 5;
+
+		// Set of books to rate
+		HashSet<BookRating> ratingList = new HashSet<BookRating>();
+		ratingList.add(new BookRating(TEST_ISBN,rating));
+
+		// Try to rate books
+		client.rateBooks(ratingList);
+
+		List<StockBook> listBooks = storeManager.getBooks();
+		assertTrue(listBooks.size() == 1);
+		StockBook bookInList1 = listBooks.get(0);
+
+
+		assertTrue( bookInList1.getNumTimesRated() == 1
+				&& bookInList1.getTotalRating() == rating);
+	}
+	/**
+	 * Tests basic rateBooks() functionality - when given an empty list
+	 * Nothing should change
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRateEmptyRateList() throws BookStoreException {
+
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		// Set of books to rate
+		HashSet<BookRating> ratingList = new HashSet<>();
+
+		// Try to rate books
+		client.rateBooks(ratingList);
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+
+	@Test
+	public void testRateInExistingBook() throws BookStoreException {
+
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int rating = 5;
+		int newISBN = 3044561;
+		// Set of books to rate
+		HashSet<BookRating> ratingList = new HashSet<>();
+		ratingList.add(new BookRating(newISBN,rating));
+
+		// Try to rate books
+		try {
+			client.rateBooks(ratingList);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+
+	/**
+	 * Tests that books cannot be rated if ISBN is invalid.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRateInvalidISBN() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		// Try to rate a book with invalid ISBN.
+		HashSet<BookRating> ratingList = new HashSet<BookRating>();
+		ratingList.add(new BookRating(TEST_ISBN,5)); // valid
+		ratingList.add(new BookRating(-1, 1)); // invalid
+
+		// Try to rate the books.
+		try {
+			client.rateBooks(ratingList);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+	/**
+	 * Tests that books cannot be retrieved if the rating is an integer grater than 5
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRateInvalidRatingTooBig() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		// Try to rate a book with invalid ISBN.
+		HashSet<BookRating> ratingList = new HashSet<BookRating>();
+		ratingList.add(new BookRating(TEST_ISBN,5)); // valid
+		ratingList.add(new BookRating(TEST_ISBN, 6)); // invalid
+
+		// Try to rate the books.
+		try {
+			client.rateBooks(ratingList);
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+	/**
+	 * Tests that books cannot be retrieved if the rating is an integer smaller than 0
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRateInvalidRatingTooSmall() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		// Try to rate a book with invalid ISBN.
+		HashSet<BookRating> ratingList = new HashSet<BookRating>();
+		ratingList.add(new BookRating(TEST_ISBN,5)); // valid
+		ratingList.add(new BookRating(TEST_ISBN, -1)); // invalid
+
+		// Try to rate the books.
+		try {
+			client.rateBooks(ratingList);
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+
 
 	/**
 	 * Tear down after class.
