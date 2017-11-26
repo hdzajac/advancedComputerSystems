@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.acertainbookstore.business.CertainBookStore;
-<<<<<<< HEAD
 import com.acertainbookstore.business.ImmutableBook;
 
-=======
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 

@@ -42,9 +42,6 @@ public enum BookStoreMessageTag {
 	/** The tag for the get stock books by ISBN message. */
 	GETSTOCKBOOKSBYISBN,
 
-<<<<<<< HEAD
 	/** The tag got the get in demand books message	 */
 	GETINDEMANDBOOKS;
-=======
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 }

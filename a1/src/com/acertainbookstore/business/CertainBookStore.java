@@ -381,11 +381,7 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-<<<<<<< HEAD
 		return bookMap.values().stream()
-=======
-		return bookMap.values().parallelStream()
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 				.filter(BookStoreBook::hadSaleMiss)
 				.map(b -> new ImmutableStockBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice(), b.getNumCopies(), b.getNumSaleMisses(), b.getNumTimesRated(), b.getTotalRating(), b.isEditorPick()))
 				.collect(Collectors.toList());

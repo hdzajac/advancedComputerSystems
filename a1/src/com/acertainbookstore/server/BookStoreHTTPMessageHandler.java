@@ -103,13 +103,10 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				addBooks(request, response);
 				break;
 
-<<<<<<< HEAD
 			case RATEBOOKS:
 				rateBooks(request, response);
 				break;
 
-=======
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 			case LISTBOOKS:
 				listBooks(response);
 				break;
@@ -126,13 +123,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				getBooks(request, response);
 				break;
 
-<<<<<<< HEAD
-=======
-			case GETBOOKSINDEMAND:
-				getBooksInDemand(response);
-				break;
-
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 			case GETEDITORPICKS:
 				getEditorPicks(request, response);
 				break;
@@ -285,20 +275,18 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	/**
 	 * Buys books.
 	 *
+	 * @param request
+	 *            the request
 	 * @param response
 	 *            the response
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	@SuppressWarnings("unchecked")
-<<<<<<< HEAD
 	private void buyBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		byte[] serializedRequestContent = getSerializedRequestContent(request);
 
 		Set<BookCopy> bookCopiesToBuy = (Set<BookCopy>) serializer.get().deserialize(serializedRequestContent);
-=======
-	private void getBooksInDemand(HttpServletResponse response) throws IOException {
->>>>>>> 38d4cbd4f644f4b14a66d1e10888dbddb8e307dc
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
