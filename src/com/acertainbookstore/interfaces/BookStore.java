@@ -6,7 +6,6 @@ import java.util.Set;
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookRating;
-import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.utils.BookStoreException;
 
 /**
@@ -56,7 +55,7 @@ public interface BookStore {
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */
-	public List<ImmutableBook> getTopRatedBooks(int numBooks) throws BookStoreException;
+	public List<Book> getTopRatedBooks(int numBooks) throws BookStoreException;
 
 	/**
 	 * Gets the list of books containing numBooks editor picks.

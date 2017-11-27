@@ -16,10 +16,8 @@ import org.junit.Test;
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.CertainBookStore;
-import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.business.BookRating;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
 import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
@@ -294,47 +292,34 @@ public class BookStoreTest {
 		assertTrue(listBooks.containsAll(booksAdded) && listBooks.size() == booksAdded.size());
 	}
 	
-	public void testGetBooksEmpty() throws BookStoreException {
-		Set<StockBook> booksAdded = new HashSet<StockBook>();
-		Set<StockBook> booksToAdd = new HashSet<StockBook>();
-		
-		storeManager.addBooks(booksToAdd);
-		List<StockBook> listBooks = storeManager.getBooks();
-
-		// Make sure the lists equal each other.
-		assertTrue(listBooks.size() == 0);
-
-	}
-	
-	
 	/**
-	 * Tests top rated books returning.
+	 * Tests that all books can be retrieved.
 	 *
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */
-	@SuppressWarnings("unlikely-arg-type")
 	@Test
-	public void testGetTopRatedBooks() throws BookStoreException {
-		int rating = 5, num = 2;
-		
+	public void testGetBooksInDemand() throws BookStoreException {
 		Set<StockBook> booksAdded = new HashSet<StockBook>();
 		booksAdded.add(getDefaultBook());
 
+		Set<StockBook> booksInDemand = new HashSet<StockBook>();
+		Set<StockBook> booksNotInDemand = new HashSet<StockBook>();
+		
 		Set<StockBook> booksToAdd = new HashSet<StockBook>();
-		Set<ImmutableBook> topRated = new HashSet<ImmutableBook>();
-		
-		
-		
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
-				(float) 300, NUM_COPIES, 0, 0, 0, false));
+				(float) 300, NUM_COPIES, 10, 0, 0, false));
+		booksInDemand.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 10, 0, 0, false));
+		
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 50, 0, 0, false));
+		booksInDemand.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 50, 0, 0, false));
+		
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 3, "The C++ Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 3, "The CPP Programming Language",
-				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		topRated.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
-				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		topRated.add(new ImmutableStockBook(TEST_ISBN + 3, "The CPP Programming Language",
+		booksNotInDemand.add(new ImmutableStockBook(TEST_ISBN + 3, "The C++ Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 
 		
@@ -342,25 +327,11 @@ public class BookStoreTest {
 
 		storeManager.addBooks(booksToAdd);
 
-		
-		// Set of books to rate
-		HashSet<BookRating> ratingList = new HashSet<BookRating>();
-		ratingList.add(new BookRating(TEST_ISBN+1,0));
-		ratingList.add(new BookRating(TEST_ISBN+2,3));
-		ratingList.add(new BookRating(TEST_ISBN+3,5));
-
-		// Try to rate books
-		client.rateBooks(ratingList);
-
-
 		// Get books in store.
-		//List<ImmutableBook> listBooks = storeManager.getTopRatedBooks(num);
-		List<ImmutableBook> listBooks = client.getTopRatedBooks(num);
+		List<StockBook> listBooks = storeManager.getBooksInDemand();
 
-		
 		// Make sure the lists equal each other.
-		assertTrue(listBooks.size() == topRated.size());
-		
+		assertTrue(listBooks.containsAll(booksInDemand) && listBooks.size() == booksInDemand.size());
 	}
 
 	/**

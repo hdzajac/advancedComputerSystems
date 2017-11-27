@@ -8,10 +8,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.acertainbookstore.business.*;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.acertainbookstore.business.BookCopy;
+import com.acertainbookstore.business.BookEditorPick;
+import com.acertainbookstore.business.CertainBookStore;
+import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreKryoSerializer;
 import com.acertainbookstore.interfaces.BookStoreSerializer;
 import com.acertainbookstore.utils.BookStoreXStreamSerializer;
@@ -103,10 +106,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				addBooks(request, response);
 				break;
 
-			case RATEBOOKS:
-				rateBooks(request, response);
-				break;
-
 			case LISTBOOKS:
 				listBooks(response);
 				break;
@@ -123,22 +122,18 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				getBooks(request, response);
 				break;
 
-			case GETEDITORPICKS:
-				getEditorPicks(request, response);
+			case GETBOOKSINDEMAND:
+				getBooksInDemand(response);
 				break;
 
-			case GETINDEMANDBOOKS:
-				getInDemandBooks(response);
-				break;
-				
-			case GETTOPRATEDBOOKS:
-				getTopRatedBooks(request, response);
+			case GETEDITORPICKS:
+				getEditorPicks(request, response);
 				break;
 
 			case GETSTOCKBOOKSBYISBN:
 				getStockBooksByISBN(request, response);
 				break;
-
+			
 			default:
 				System.err.println("Unsupported message tag.");
 				break;
@@ -147,50 +142,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		// Mark the request as handled so that the HTTP response can be sent
 		baseRequest.setHandled(true);
-	}
-	
-	/**
-	 * Gets the top rated books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void getTopRatedBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String numBooksString = URLDecoder.decode(request.getParameter(BookStoreConstants.BOOK_NUM_PARAM), "UTF-8");
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-		
-		try {
-			int numBooks = BookStoreUtility.convertStringToInt(numBooksString);
-			bookStoreResponse.setList(myBookStore.getTopRatedBooks(numBooks));
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
-		
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
-
-	/**
-	 * Gets the books in demand
-
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void getInDemandBooks(HttpServletResponse response) throws IOException {
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-		try {
-			bookStoreResponse.setList(myBookStore.getBooksInDemand());
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
 	}
 
 	/**
@@ -273,6 +224,28 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	}
 
 	/**
+	 * Gets the books in demand.
+	 *
+	 * @param response
+	 *            the response
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	@SuppressWarnings("unchecked")
+	private void getBooksInDemand(HttpServletResponse response) throws IOException {
+		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+
+		try {
+			bookStoreResponse.setList(myBookStore.getBooksInDemand());
+		} catch (BookStoreException ex) {
+			bookStoreResponse.setException(ex);
+		}
+
+		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+		response.getOutputStream().write(serializedResponseContent);
+	}
+	
+	/**
 	 * Buys books.
 	 *
 	 * @param request
@@ -291,33 +264,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		try {
 			myBookStore.buyBooks(bookCopiesToBuy);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
-
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
-
-	/**
-	 * Rate books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void rateBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
-
-		Set<BookRating> bookToRate = (Set<BookRating>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-
-		try {
-			myBookStore.rateBooks(bookToRate);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}

@@ -3,10 +3,8 @@ package com.acertainbookstore.interfaces;
 import java.util.List;
 import java.util.Set;
 
-import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookEditorPick;
-import com.acertainbookstore.business.ImmutableBook;
 import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreException;
 
@@ -66,9 +64,6 @@ public interface StockManager {
 	 */
 	public List<StockBook> getBooksInDemand() throws BookStoreException;
 
-
-
-	
 	/**
 	 * Updates the books by mark/unmark them as editor pick.
 	 *
@@ -96,8 +91,4 @@ public interface StockManager {
 	 *             the book store exception
 	 */
 	public void removeBooks(Set<Integer> isbnSet) throws BookStoreException;
-
-	
-	
-	
 }
