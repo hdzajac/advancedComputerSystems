@@ -1,5 +1,7 @@
 package com.acertainbookstore.business;
 
+import com.acertainbookstore.interfaces.StockManager;
+
 /**
  * {@link StockBook} implements the {@link Book} data-structure that a
  * {@link StockManager} works with.

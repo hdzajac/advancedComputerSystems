@@ -345,7 +345,8 @@ public class BookStoreTest {
 
 		
 		// Make sure the lists equal each other.
-		assertTrue(listBooks.containsAll(topRated) && listBooks.size() == topRated.size());
+		assertTrue( listBooks.size() == topRated.size());
+		assertTrue(listBooks.containsAll(topRated));
 	}
 
 	/**

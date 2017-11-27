@@ -371,7 +371,9 @@ public class CertainBookStore implements BookStore, StockManager {
 		int n = bookMap.values().size();
 		return bookMap.values().stream().sorted(Comparator.comparingLong(BookStoreBook::getTotalRating))
 			    .map(b -> new ImmutableBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice()))
-				.collect(Collectors.toList()).subList(n-numBooks, n);
+				.collect(Collectors.toList());
+//		List<ImmutableBook>a =  tmp.subList(n-numBooks, n);
+//		return tmp;
 	}
 
 	/*
