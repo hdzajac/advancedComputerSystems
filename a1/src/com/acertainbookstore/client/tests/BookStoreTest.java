@@ -6,18 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.acertainbookstore.business.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.acertainbookstore.business.Book;
-import com.acertainbookstore.business.BookCopy;
-import com.acertainbookstore.business.CertainBookStore;
-import com.acertainbookstore.business.ImmutableStockBook;
-import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.business.BookRating;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
 import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
@@ -511,7 +506,59 @@ public class BookStoreTest {
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
 
+	@Test
+	public void testGet1EditorPick() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = 1;
+		Set<BookEditorPick> editorPicks = new HashSet<>();
+		BookEditorPick editorPick = new BookEditorPick(TEST_ISBN,true);
+		editorPicks.add(editorPick);
+		storeManager.updateEditorPicks(editorPicks);
+		// Try to buy a book with invalid ISBN.
+		List<Book> getEditorPicks = client.getEditorPicks(numBooks);
 
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+		assertTrue( getEditorPicks.size() == 1 &&
+					getEditorPicks.contains(getDefaultBook()));
+	}
+
+	@Test
+	public void testGetEditorPicks0PicksPresent() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = 3;
+		// Try to buy a book with invalid ISBN.
+		List<Book> editorPicks = client.getEditorPicks(numBooks);
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+		assertTrue( editorPicks.size() == 0);
+	}
+
+	@Test
+	public void testGetEditorPicksInvalidK() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = -1;
+		// Try to buy a book with invalid ISBN.
+
+		try {
+			client.getEditorPicks(numBooks);
+		} catch (BookStoreException ex) {
+			;
+		}
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+		// Try to rate the books.
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
 	/**
 	 * Tear down after class.
 	 *
