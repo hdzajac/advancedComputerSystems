@@ -368,12 +368,21 @@ public class CertainBookStore implements BookStore, StockManager {
 			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
 		}
 		
+		
+		// First we get the list of books sorted by total rating.
 		int n = bookMap.values().size();
-		return bookMap.values().stream().sorted(Comparator.comparingLong(BookStoreBook::getTotalRating))
+		List<ImmutableBook> l = bookMap.values().stream().sorted(Comparator.comparingLong(BookStoreBook::getTotalRating))
 			    .map(b -> new ImmutableBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice()))
 				.collect(Collectors.toList());
-//		List<ImmutableBook>a =  tmp.subList(n-numBooks, n);
-//		return tmp;
+		
+		// Now a sublist of 'numBooks' top rated books is created (subList method does not fit here when http communication is performed)
+		List<ImmutableBook> r = new ArrayList<ImmutableBook>();
+		for(int i = 0; i < numBooks; i++) {
+			r.add(l.get(n-i-1));
+			
+		}
+		
+		return r;
 	}
 
 	/*
