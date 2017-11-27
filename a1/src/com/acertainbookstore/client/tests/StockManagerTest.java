@@ -219,6 +219,104 @@ public class StockManagerTest {
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
 
+	
+
+	/**
+	 * Tests adding adding a book with empty title field is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookInvalidTitle() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "", "JUnit Rowling", (float) 100,
+				5, 0, 0, 0, false)); 
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+		
+	}
+	
+	
+
+	/**
+	 * Tests adding a book with empty author field is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookInvalidBookAuthor() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "Harry Potter and Marcos", "", (float) 100,
+				5, 0, 0, 0, false)); 
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());		
+		
+	}
+
+	/**
+	 * Tests adding a book with repeated ISBN is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookRepeatedISBN() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN, "Harry Potter and Marcos", "JUnit Rowling", (float) 100,
+				5, 0, 0, 0, false)); 
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());		
+		
+		
+	}
+	
 	/**
 	 * Tests adding copies of a book with correct parameters.
 	 *
@@ -283,7 +381,25 @@ public class StockManagerTest {
 		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
+	
 
+	/**
+	 * Checks whether the call to add copies with null parameter is rejected
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddCopiesNull() throws BookStoreException {
+		try {
+			storeManager.addCopies(null);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+	}
+
+	
 	/**
 	 * Checks whether the insertion of a number of copies for an invalid ISBN
 	 * with addCopies (N.B. not addBooks as above) is rejected
