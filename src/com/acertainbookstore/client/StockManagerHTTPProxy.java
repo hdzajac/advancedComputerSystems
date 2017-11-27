@@ -152,7 +152,7 @@ public class StockManagerHTTPProxy implements StockManager {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<StockBook> getBooksInDemand() throws BookStoreException {
-		String urlString = serverAddress + "/" + BookStoreMessageTag.GETBOOKSINDEMAND;
+		String urlString = serverAddress + "/" + BookStoreMessageTag.GETINDEMANDBOOKS;
 		BookStoreRequest bookStoreRequest = BookStoreRequest.newGetRequest(urlString);
 		BookStoreResponse bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest,
 				serializer.get());

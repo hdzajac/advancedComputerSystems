@@ -2,6 +2,7 @@ package com.acertainbookstore.business;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -21,7 +22,7 @@ import com.acertainbookstore.utils.BookStoreUtility;
 /**
  * {@link CertainBookStore} implements the {@link BookStore} and
  * {@link StockManager} functionalities.
- * 
+ *
  * @see BookStore
  * @see StockManager
  */
@@ -41,7 +42,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addBooks(java.util.Set)
 	 */
@@ -91,7 +92,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addCopies(java.util.Set)
 	 */
@@ -133,7 +134,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.StockManager#getBooks()
 	 */
 	public synchronized List<StockBook> getBooks() {
@@ -149,7 +150,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#updateEditorPicks(java.util
 	 * .Set)
@@ -182,7 +183,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.BookStore#buyBooks(java.util.Set)
 	 */
 	public synchronized void buyBooks(Set<BookCopy> bookCopiesToBuy) throws BookStoreException {
@@ -241,7 +242,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#getBooksByISBN(java.util.
 	 * Set)
@@ -272,7 +273,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.BookStore#getBooks(java.util.Set)
 	 */
 	public synchronized List<Book> getBooks(Set<Integer> isbnSet) throws BookStoreException {
@@ -302,7 +303,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.BookStore#getEditorPicks(int)
 	 */
 	public synchronized List<Book> getEditorPicks(int numBooks) throws BookStoreException {
@@ -358,22 +359,40 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.BookStore#getTopRatedBooks(int)
 	 */
 	@Override
 	public synchronized List<Book> getTopRatedBooks(int numBooks) throws BookStoreException {
-		throw new BookStoreException();
+		if (numBooks < 0) {
+			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
+		}
+
+
+		// First we get the list of books sorted by total rating.
+		int n = bookMap.values().size();
+		List<ImmutableBook> l = bookMap.values().stream().sorted(Comparator.comparingLong(BookStoreBook::getTotalRating))
+				.map(b -> new ImmutableBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice()))
+				.collect(Collectors.toList());
+
+		// Now a sublist of 'numBooks' top rated books is created (subList method does not fit here when http communication is performed)
+		List<Book> r = new ArrayList<>();
+		for(int i = 0; i < numBooks; i++) {
+			r.add(l.get(n-i-1));
+
+		}
+
+		return r;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.StockManager#getBooksInDemand()
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-		return bookMap.values().parallelStream()
+		return bookMap.values().stream()
 				.filter(BookStoreBook::hadSaleMiss)
 				.map(b -> new ImmutableStockBook(b.getISBN(),b.getTitle(), b.getAuthor(), b.getPrice(), b.getNumCopies(), b.getNumSaleMisses(), b.getNumTimesRated(), b.getTotalRating(), b.isEditorPick()))
 				.collect(Collectors.toList());
@@ -381,17 +400,51 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.BookStore#rateBooks(java.util.Set)
 	 */
 	@Override
 	public synchronized void rateBooks(Set<BookRating> bookRating) throws BookStoreException {
-		throw new BookStoreException();
+		if (bookRating == null) {
+			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
+		}
+
+		// Check that all ISBNs that we rate are there first.
+		int isbn;
+		int rating;
+		BookStoreBook book;
+
+		Map<Integer, Integer> salesMisses = new HashMap<>();
+
+		for (BookRating bookToRate : bookRating) {
+			isbn = bookToRate.getISBN();
+			rating = bookToRate.getRating();
+			if (BookStoreUtility.isInvalidISBN(isbn)) {
+				throw new BookStoreException(BookStoreConstants.ISBN + isbn + BookStoreConstants.INVALID);
+			}
+
+			if (rating < 0 || rating > 5) {
+				throw new BookStoreException(BookStoreConstants.RATING + rating + BookStoreConstants.INVALID);
+			}
+
+			if (!bookMap.containsKey(isbn)) {
+				throw new BookStoreException(BookStoreConstants.ISBN + isbn + BookStoreConstants.NOT_AVAILABLE);
+			}
+
+			book = bookMap.get(isbn);
+
+		}
+
+		// Then make the purchase.
+		for (BookRating bookR : bookRating) {
+			book = bookMap.get(bookR.getISBN());
+			book.addRating(bookR.getRating());
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.acertainbookstore.interfaces.StockManager#removeAllBooks()
 	 */
 	public synchronized void removeAllBooks() throws BookStoreException {
@@ -400,7 +453,7 @@ public class CertainBookStore implements BookStore, StockManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#removeBooks(java.util.Set)
 	 */

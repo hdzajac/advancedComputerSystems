@@ -28,7 +28,7 @@ import com.acertainbookstore.utils.BookStoreException;
 
 /**
  * {@StockManagerTest} tests the {@link StockManager} interface.
- * 
+ *
  * @see StockManager
  */
 public class StockManagerTest {
@@ -56,7 +56,7 @@ public class StockManagerTest {
 		try {
 			String localTestProperty = System.getProperty(BookStoreConstants.PROPERTY_KEY_LOCAL_TEST);
 			localTest = (localTestProperty != null) ? Boolean.parseBoolean(localTestProperty) : localTest;
-			
+
 			if (localTest) {
 				CertainBookStore store = new CertainBookStore();
 				storeManager = store;
@@ -65,7 +65,7 @@ public class StockManagerTest {
 				storeManager = new StockManagerHTTPProxy("http://localhost:8081/stock");
 				client = new BookStoreHTTPProxy("http://localhost:8081");
 			}
-			
+
 			storeManager.removeAllBooks();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -217,6 +217,118 @@ public class StockManagerTest {
 		// Check pre and post state are same.
 		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+
+	/**
+	 * Tests adding adding a book with empty title field is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookInvalidTitle() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "", "JUnit Rowling", (float) 100,
+				5, 0, 0, 0, false));
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+
+	}
+
+
+
+	/**
+	 * Tests adding a book with empty author field is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookInvalidBookAuthor() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "Harry Potter and Marcos", "", (float) 100,
+				5, 0, 0, 0, false));
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+
+	}
+
+	/**
+	 * Checks whether the call to add copies with null parameter is rejected
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddCopiesNull() throws BookStoreException {
+		try {
+			storeManager.addCopies(null);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+	}
+
+	/**
+	 * Tests adding a book with repeated ISBN is rejected.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testAddBookRepeatedISBN() throws BookStoreException{
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN, "Harry Potter and Vivek", "JUnit Rowling", (float) 100, 5,
+				0, 0, 0, false)); // valid
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN, "Harry Potter and Marcos", "JUnit Rowling", (float) 100,
+				5, 0, 0, 0, false));
+
+		try {
+			storeManager.addBooks(booksToAdd);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+
+
 	}
 
 	/**
@@ -383,6 +495,51 @@ public class StockManagerTest {
 
 		assertTrue(editorPick.equals(defaultBookAdded));
 	}
+
+	/**
+	 * Checks that a book can be removed.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRemoveBooks() throws BookStoreException {
+		List<StockBook> booksAdded = new ArrayList<StockBook>();
+		StockBook book1 = getDefaultBook();
+		booksAdded.add(book1);
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book2);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book3);
+
+		booksAdded.addAll(booksToAdd);
+
+		// Add books in bookstore.
+		storeManager.addBooks(booksToAdd);
+
+		List<StockBook> booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(TEST_ISBN);
+		isbnSet.add(TEST_ISBN + 2);
+
+		// Remove the two books.
+		storeManager.removeBooks(isbnSet);
+
+		// Remove from the local list
+		booksAdded.remove(book1);
+		booksAdded.remove(book3);
+
+		// Check that the books were removed.
+		booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+	}
+
 	/**
 	 * Tests update editors pick functionality.
 	 * Given an empty set should throw the BookStoreException
@@ -475,13 +632,13 @@ public class StockManagerTest {
 	}
 
 	/**
-	 * Checks that a book can be removed.
+	 * Checks that you can't remove book that was not added.
 	 *
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */
 	@Test
-	public void testRemoveBooks() throws BookStoreException {
+	public void testRemoveNotAddedBooks() throws BookStoreException {
 		List<StockBook> booksAdded = new ArrayList<StockBook>();
 		StockBook book1 = getDefaultBook();
 		booksAdded.add(book1);
@@ -503,19 +660,95 @@ public class StockManagerTest {
 		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
 
 		Set<Integer> isbnSet = new HashSet<Integer>();
-		isbnSet.add(TEST_ISBN);
+		isbnSet.add(TEST_ISBN + 3);
+
+		try {
+			storeManager.removeBooks(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (TEST_ISBN + 3) + BookStoreConstants.NOT_AVAILABLE).getMessage(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Checks that removing books follows all or nothing semantics.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRemoveBooksIsAllOrNothing() throws BookStoreException {
+		List<StockBook> booksAdded = new ArrayList<StockBook>();
+		StockBook book1 = getDefaultBook();
+		booksAdded.add(book1);
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book2);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book3);
+
+		booksAdded.addAll(booksToAdd);
+
+		// Add books in bookstore.
+		storeManager.addBooks(booksToAdd);
+
+		List<StockBook> booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(TEST_ISBN + 1);
 		isbnSet.add(TEST_ISBN + 2);
+		isbnSet.add(TEST_ISBN + 3);
 
-		// Remove the two books.
-		storeManager.removeBooks(isbnSet);
+		try {
+			storeManager.removeBooks(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (TEST_ISBN + 3) + BookStoreConstants.NOT_AVAILABLE).getMessage(), e.getMessage());
+		}
 
-		// Remove from the local list
-		booksAdded.remove(book1);
-		booksAdded.remove(book3);
-
-		// Check that the books were removed.
+		// Check that the books are still there.
 		booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+	}
+
+	/**
+	 * Checks that you can't remove book with invalid ISBN.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRemoveInvalidISBNBooks() throws BookStoreException {
+		List<StockBook> booksAdded = new ArrayList<StockBook>();
+		StockBook book1 = getDefaultBook();
+		booksAdded.add(book1);
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book2);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false);
+		booksToAdd.add(book3);
+
+		booksAdded.addAll(booksToAdd);
+
+		// Add books in bookstore.
+		storeManager.addBooks(booksToAdd);
+
+		List<StockBook> booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(-1);
+
+		try {
+			storeManager.removeBooks(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (-1) + BookStoreConstants.INVALID).getMessage(), e.getMessage());
+		}
 	}
 
 	/**
@@ -542,6 +775,86 @@ public class StockManagerTest {
 	}
 
 	/**
+	 * Tests whether getBookByISBN follows the all or nothing semantics.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksByISBNIsAllOrNothing() throws BookStoreException {
+		List<StockBook> booksAdded = new ArrayList<StockBook>();
+		StockBook book1 = getDefaultBook();
+		booksAdded.add(book1);
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		storeManager.addBooks(booksToAdd);
+
+		booksAdded.addAll(booksToAdd);
+
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(TEST_ISBN + 1);
+		isbnSet.add(TEST_ISBN + 2);
+		isbnSet.add(TEST_ISBN + 3);
+
+		try {
+			List<StockBook> listBooks = storeManager.getBooksByISBN(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (TEST_ISBN + 3) + BookStoreConstants.NOT_AVAILABLE).getMessage(), e.getMessage());
+		}
+
+		// Check that the books are still there.
+		List<StockBook> booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
+	}
+
+	/**
+	 * Tests if throws an error when querying for ont available book.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetNotAddedBooksByISBN() throws BookStoreException {
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		storeManager.addBooks(booksToAdd);
+
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(TEST_ISBN + 3);
+
+		try {
+			List<StockBook> listBooks = storeManager.getBooksByISBN(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (TEST_ISBN + 3) + BookStoreConstants.NOT_AVAILABLE).getMessage(), e.getMessage());
+		}
+	}
+
+	/**
+	 * Tests if throws an error when querying for a book with invalid ISBN.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksByISBNWithInvalidISBN() throws BookStoreException {
+		Set<Integer> isbnSet = new HashSet<Integer>();
+		isbnSet.add(-1);
+
+		try {
+			List<StockBook> listBooks = storeManager.getBooksByISBN(isbnSet);
+		} catch (BookStoreException e) {
+			assertEquals(new BookStoreException(BookStoreConstants.ISBN + (-1) + BookStoreConstants.INVALID).getMessage(), e.getMessage());
+		}
+	}
+
+	/**
 	 * Tests basic removeAllBooks functionality.
 	 *
 	 * @throws BookStoreException
@@ -563,6 +876,142 @@ public class StockManagerTest {
 
 		booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.size() == 0);
+	}
+
+	/**
+	 * Tests extra removeAllBooks functionality.
+	 * Remove from empty book store
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testRemoveAllBooksEmptyStore() throws BookStoreException {
+
+		Set<Integer> tmp = new HashSet<>();
+		tmp.add(getDefaultBook().getISBN());
+		storeManager.removeBooks(tmp);
+
+		List<StockBook> booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.size() == 0);
+
+		storeManager.removeAllBooks();
+
+		booksInStoreList = storeManager.getBooks();
+		assertTrue(booksInStoreList.size() == 0);
+	}
+
+	/**
+	 * Tests getBooksInDemand functionality.
+	 *
+	 * Empty response
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksInDemandEmptyResponse() throws BookStoreException {
+		Set<StockBook> set1 = new HashSet<StockBook>();
+		set1.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		set1.add(new ImmutableStockBook(TEST_ISBN + 3, "The Art of Life", "Hubert Zajac",
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
+		set1.add(new ImmutableStockBook(TEST_ISBN + 4, "The Art of Death",
+				"Hubert Zajac", (float) 50, NUM_COPIES, 0, 0, 0, false));
+		storeManager.addBooks(set1);
+
+		List<StockBook> demand1 = storeManager.getBooksInDemand();
+		assertTrue(demand1.size() == 0);
+	}
+
+	/**
+	 * Tests getBooksInDemand functionality.
+	 *
+	 * Not Empty response
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksInDemandNotEmpty() throws BookStoreException {
+		Set<StockBook> set1 = new HashSet<StockBook>();
+		Set<StockBook> set2 = new HashSet<StockBook>();
+
+		ImmutableStockBook book1 = new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 2, 0, 0, false);
+		set1.add(book1);
+		storeManager.addBooks(set1);
+
+		List<StockBook> demand1 = storeManager.getBooksInDemand();
+		assertTrue(demand1.size() == 1);
+		assertEquals(demand1.get(0), book1);
+
+
+
+		ImmutableStockBook book2 = new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 15, 0, 0, false);
+		ImmutableStockBook book3 = new ImmutableStockBook(TEST_ISBN + 3, "The Art of Life", "Hubert Zajac",
+				(float) 300, NUM_COPIES, 0, 0, 0, false);
+		ImmutableStockBook book4 = new ImmutableStockBook(TEST_ISBN + 4, "The Art of Death",
+				"Hubert Zajac", (float) 50, NUM_COPIES, 3, 0, 0, false);
+
+
+		set2.add(book2);
+		set2.add(book3);
+		set2.add(book4);
+		storeManager.addBooks(set2);
+
+
+		List<StockBook> demand2 = storeManager.getBooksInDemand();
+		assertTrue(demand2.size() == 3);
+		set2.remove(book3);
+		set2.add(book1);
+		assertTrue(demand2.containsAll(set2));
+	}
+
+	/**
+	 * Tests that all books can be retrieved.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooks() throws BookStoreException {
+		Set<StockBook> booksAdded = new HashSet<StockBook>();
+		booksAdded.add(getDefaultBook());
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+				(float) 300, NUM_COPIES, 0, 0, 0, false));
+		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+
+		booksAdded.addAll(booksToAdd);
+
+		storeManager.addBooks(booksToAdd);
+
+		// Get books in store.
+		List<StockBook> listBooks = storeManager.getBooks();
+
+		// Make sure the lists equal each other.
+		assertTrue(listBooks.containsAll(booksAdded) && listBooks.size() == booksAdded.size());
+	}
+
+	/**
+	 * Tests that no books can be retrieved from an empty store.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetBooksFromEmptyStore() throws BookStoreException {
+		storeManager.removeAllBooks();
+
+		// Get books in store.
+		List<StockBook> listBooks = storeManager.getBooks();
+
+		// Make sure the lists equal each other.
+		assertTrue(listBooks.size() == 0);
 	}
 
 	/**
