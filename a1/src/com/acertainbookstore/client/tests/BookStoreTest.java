@@ -293,6 +293,19 @@ public class BookStoreTest {
 		assertTrue(listBooks.containsAll(booksAdded) && listBooks.size() == booksAdded.size());
 	}
 	
+	public void testGetBooksEmpty() throws BookStoreException {
+		Set<StockBook> booksAdded = new HashSet<StockBook>();
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		
+		storeManager.addBooks(booksToAdd);
+		List<StockBook> listBooks = storeManager.getBooks();
+
+		// Make sure the lists equal each other.
+		assertTrue(listBooks.size() == 0);
+
+	}
+	
+	
 	/**
 	 * Tests top rated books returning.
 	 *
