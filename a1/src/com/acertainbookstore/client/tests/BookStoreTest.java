@@ -506,6 +506,13 @@ public class BookStoreTest {
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
 
+	/**
+	 * Test get editors picks functionality
+	 *
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
 	@Test
 	public void testGet1EditorPick() throws BookStoreException {
 		List<StockBook> booksInStorePreTest = storeManager.getBooks();
@@ -526,6 +533,13 @@ public class BookStoreTest {
 					getEditorPicks.contains(getDefaultBook()));
 	}
 
+	/**
+	 * Test get editors picks functionality
+	 * O books marked as editors pick - an empty list is returned
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
 	@Test
 	public void testGetEditorPicks0PicksPresent() throws BookStoreException {
 		List<StockBook> booksInStorePreTest = storeManager.getBooks();
@@ -541,6 +555,13 @@ public class BookStoreTest {
 		assertTrue( editorPicks.size() == 0);
 	}
 
+	/**
+	 * Test get editors picks functionality
+	 * Given an invalid K - an error is thrown and nothing changes in the store
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
 	@Test
 	public void testGetEditorPicksInvalidK() throws BookStoreException {
 		List<StockBook> booksInStorePreTest = storeManager.getBooks();
