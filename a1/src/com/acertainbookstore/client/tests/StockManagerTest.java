@@ -499,6 +499,96 @@ public class StockManagerTest {
 
 		assertTrue(editorPick.equals(defaultBookAdded));
 	}
+	/**
+	 * Tests update editors pick functionality.
+	 * Given an empty set should throw the BookStoreException
+	 * And the store should not change
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testUpdateEditorsPickNull() throws BookStoreException {
+
+		// The default book should not be an editor pick.
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		// Try to buy the books.
+		try {
+			storeManager.updateEditorPicks(null);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
+
+	/**
+	 * Tests update editors pick functionality.
+	 * Tests that editorPick can not be updated if ISBN is invalid.
+	 * all-or-nothing
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testUpdateEditorsPickInvalidISBN() throws BookStoreException {
+
+		// The default book should not be an editor pick.
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<BookEditorPick> editorPicks = new HashSet<>();
+		editorPicks.add(new BookEditorPick(TEST_ISBN,true));//valid
+		editorPicks.add(new BookEditorPick(-1,true));//invalid
+
+		try {
+			storeManager.updateEditorPicks(editorPicks);
+			fail();
+		} catch (BookStoreException ex) {
+			;
+		}
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post contain the same elements.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+
+	}
+
+	/**
+	 * Tests update editors pick functionality.
+	 * Mark the default book as editors pick
+	 *
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testUpdateEditorsPickForDefaultBook() throws BookStoreException {
+
+		// The default book should not be an editor pick.
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+
+		Set<BookEditorPick> editorPicks = new HashSet<>();
+		BookEditorPick editorPick = new BookEditorPick(TEST_ISBN,true);
+		editorPicks.add(editorPick);
+		storeManager.updateEditorPicks(editorPicks);
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+		StockBook bookInList1 = booksInStorePostTest.get(0);
+
+		// Check pre and post contain the same elements.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+
+		// Check if that the editorPicks flag has changed.
+		assertTrue(bookInList1.isEditorPick());
+	}
 
 	/**
 	 * Checks that a book can be removed.

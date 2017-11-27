@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.acertainbookstore.business.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -581,7 +582,80 @@ public class BookStoreTest {
 				&& booksInStorePreTest.size() == booksInStorePostTest.size());
 	}
 
+	/**
+	 * Test get editors picks functionality
+	 *
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGet1EditorPick() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = 1;
+		Set<BookEditorPick> editorPicks = new HashSet<>();
+		BookEditorPick editorPick = new BookEditorPick(TEST_ISBN,true);
+		editorPicks.add(editorPick);
+		storeManager.updateEditorPicks(editorPicks);
+		// Try to buy a book with invalid ISBN.
+		List<Book> getEditorPicks = client.getEditorPicks(numBooks);
 
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+		assertTrue( getEditorPicks.size() == 1 &&
+					getEditorPicks.contains(getDefaultBook()));
+	}
+
+	/**
+	 * Test get editors picks functionality
+	 * O books marked as editors pick - an empty list is returned
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetEditorPicks0PicksPresent() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = 3;
+		// Try to buy a book with invalid ISBN.
+		List<Book> editorPicks = client.getEditorPicks(numBooks);
+
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+		assertTrue( editorPicks.size() == 0);
+	}
+
+	/**
+	 * Test get editors picks functionality
+	 * Given an invalid K - an error is thrown and nothing changes in the store
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testGetEditorPicksInvalidK() throws BookStoreException {
+		List<StockBook> booksInStorePreTest = storeManager.getBooks();
+		int numBooks = -1;
+		// Try to buy a book with invalid ISBN.
+
+		try {
+			client.getEditorPicks(numBooks);
+		} catch (BookStoreException ex) {
+			;
+		}
+		List<StockBook> booksInStorePostTest = storeManager.getBooks();
+		// Try to rate the books.
+
+		// Check pre and post state are same.
+		assertTrue(booksInStorePreTest.containsAll(booksInStorePostTest)
+				&& booksInStorePreTest.size() == booksInStorePostTest.size());
+	}
 	/**
 	 * Tear down after class.
 	 *
