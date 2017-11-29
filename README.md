@@ -19,6 +19,15 @@ $ant -Dlocaltest=true test
 4. To run the test cases remotely
 $ant -Dlocaltest=false test
 
+5. To run the test cases with the single lock implementation (only for localtest=true)
+$ant -Dsinglelock=true test
+
+6. To run the test cases with the two-level locking implementation (only for localtest=true)
+$ant -Dsinglelock=false test
+
+7. To run the test cases remotely with the two-level locking implementation set SINGLE_LOCK = false in the
+   BookStoreHTTPServer.
+
 ************ If you do not want to use ant **********************
 
 1. Import the the project in your IDE. 

@@ -157,9 +157,7 @@ public class BookStoreHTTPProxy implements BookStore {
 	 */
 	@Override
 	public void rateBooks(Set<BookRating> bookRating) throws BookStoreException {
-		String urlString = serverAddress + "/" + BookStoreMessageTag.RATEBOOKS;
-		BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, bookRating);
-		BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+		throw new BookStoreException();
 	}
 
 	/*

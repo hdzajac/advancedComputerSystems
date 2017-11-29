@@ -21,17 +21,11 @@ public enum BookStoreMessageTag {
 	/** The tag for the buy books message. */
 	BUYBOOKS,
 
-	/** The tag for the rate books message. */
-	RATEBOOKS,
-
 	/** The tag for the update editor picks message. */
 	UPDATEEDITORPICKS,
 
 	/** The tag for the editor picks message. */
 	GETEDITORPICKS,
-
-	/** The tag for the top rated books picks message. */
-	GETTOPRATEDBOOKS,
 
 	/** The tag for the remove all books message. */
 	REMOVEALLBOOKS,
@@ -40,8 +34,5 @@ public enum BookStoreMessageTag {
 	REMOVEBOOKS,
 
 	/** The tag for the get stock books by ISBN message. */
-	GETSTOCKBOOKSBYISBN,
-
-	/** The tag got the get in demand books message	 */
-	GETINDEMANDBOOKS;
+	GETSTOCKBOOKSBYISBN;
 }

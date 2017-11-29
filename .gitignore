@@ -1,4 +1,6 @@
 *.class
+bin/
+*~
 
 # Package Files #
 *.war
@@ -6,11 +8,4 @@
 /bin/
 .DS_Store
 
-.classpath
-.project
 .idea
-*.iml
-/a1/.idea
-/a1/.project
-/a1/.classpath
-

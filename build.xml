@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="build" name="acertainbookstore">
-  <path id="acertainbookstore.classpath">
-    <fileset dir="lib">
-      <include name="**/*.jar"/>
-    </fileset>
-    <pathelement location="bin"/>
+    <path id="acertainbookstore.classpath">
+      <fileset dir="lib">
+        <include name="**/*.jar"/>
+      </fileset>
+      <pathelement location="bin"/>
     </path>
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
     <target name="init">
