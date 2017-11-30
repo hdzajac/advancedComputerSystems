@@ -21,11 +21,9 @@ public class Test1Client1 extends Thread {
         {
             try {
                 ConcurrencyTest.client.buyBooks(booksToBuy);
-                System.out.println("Buy copies ");
-
             }
             catch (BookStoreException ex) {
-              ;
+              ex.printStackTrace();
             }
         }
 

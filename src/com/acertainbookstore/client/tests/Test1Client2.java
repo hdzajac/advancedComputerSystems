@@ -22,10 +22,10 @@ public class Test1Client2 extends Thread {
         {
             try {
                 ConcurrencyTest.storeManager.addCopies(bookCopiesSet);
-                System.out.println("Add copies ");
+//                System.out.println("Add copies ");
             }
             catch (BookStoreException ex) {
-                ;
+                ex.printStackTrace();
             }
         }
 

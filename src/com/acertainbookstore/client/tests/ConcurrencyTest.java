@@ -8,8 +8,11 @@ import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import org.junit.*;
+import org.junit.runner.RunWith;
+import sun.awt.image.ImageWatched;
 
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,6 +32,9 @@ public class ConcurrencyTest {
 
     /** Single lock test */
     private static boolean singleLock = true;
+
+    public final static Integer SLEEP = 5;
+
 
 
     /** The store manager. */
@@ -116,9 +122,6 @@ public class ConcurrencyTest {
         Set<BookCopy> bookCopiesSet = new HashSet<BookCopy>();
         bookCopiesSet.add(new BookCopy(TEST_ISBN, copies));
 
-        StockBook bookBefore  = storeManager.getBooks().get(0);
-
-
         // start client threads
         Test1Client1 client1 = new Test1Client1(numberOfOperations,booksToBuy);
         Test1Client2 client2 = new Test1Client2(numberOfOperations,bookCopiesSet);
@@ -132,8 +135,7 @@ public class ConcurrencyTest {
 
         StockBook bookAfter  = storeManager.getBooks().get(0);
 
-        assertTrue(bookBefore.getNumCopies() == bookAfter.getNumCopies());
-
+        assertTrue(1000005 == bookAfter.getNumCopies());
     }
 
 

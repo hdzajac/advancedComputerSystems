@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
+import com.acertainbookstore.client.tests.ConcurrencyTest;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
@@ -118,13 +119,20 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 		}
 
 		BookStoreBook book;
+		Random r = new Random();
 
 		// Update the number of copies
 		for (BookCopy bookCopy : bookCopiesSet) {
+			try {
+				Thread.sleep(Math.abs(r.nextInt())%ConcurrencyTest.SLEEP);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			isbn = bookCopy.getISBN();
 			numCopies = bookCopy.getNumCopies();
 			book = bookMap.get(isbn);
-			book.addCopies(numCopies);
+			for (int j = 0; j < numCopies;j++)
+				book.addCopies(1);
 		}
 	}
 
@@ -210,8 +218,14 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 			}
 
 			book = bookMap.get(isbn);
+			Random r = new Random();
 
 			if (!book.areCopiesInStore(bookCopyToBuy.getNumCopies())) {
+				try {
+					Thread.sleep(Math.abs(r.nextInt())% ConcurrencyTest.SLEEP);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				// If we cannot sell the copies of the book, it is a miss.
 				salesMisses.put(isbn, bookCopyToBuy.getNumCopies() - book.getNumCopies());
 				saleMiss = true;
@@ -231,7 +245,8 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 		// Then make the purchase.
 		for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
 			book = bookMap.get(bookCopyToBuy.getISBN());
-			book.buyCopies(bookCopyToBuy.getNumCopies());
+			for (int j = 0; j < bookCopyToBuy.getNumCopies();j++)
+				book.buyCopies(1);
 		}
 	}
 
