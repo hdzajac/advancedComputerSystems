@@ -8,12 +8,8 @@ import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import org.junit.*;
-import org.junit.runner.RunWith;
-import sun.awt.image.ImageWatched;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
@@ -32,6 +28,10 @@ public class ConcurrencyTest {
 
     /** Single lock test */
     private static boolean singleLock = true;
+
+    private static final Integer test2Number = 1000;
+
+    public static boolean test2Result = true;
 
     public final static Integer SLEEP = 5;
 
@@ -164,5 +164,51 @@ public class ConcurrencyTest {
             ((BookStoreHTTPProxy) client).stop();
             ((StockManagerHTTPProxy) storeManager).stop();
         }
+    }
+
+    @Test
+    public void test2SingleLock() throws BookStoreException, InterruptedException {
+
+        StockBook book1 = getDefaultBook();
+        StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and JUnit2", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book3 = new ImmutableStockBook(TEST_ISBN + 2, "Harry Potter and JUnit3", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book4 = new ImmutableStockBook(TEST_ISBN + 3, "Harry Potter and JUnit4", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book5 = new ImmutableStockBook(TEST_ISBN + 4, "Harry Potter and JUnit5", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+
+        Set<StockBook> booksToAdd = new HashSet<>();
+        booksToAdd.add(book2);
+        booksToAdd.add(book3);
+        booksToAdd.add(book4);
+        booksToAdd.add(book5);
+
+        storeManager.addBooks(booksToAdd);
+
+        booksToAdd.add(book1);
+
+        Set<BookCopy> addCopies = new HashSet<>();
+        addCopies.add(new BookCopy(book1.getISBN(), 5));
+        addCopies.add(new BookCopy(book2.getISBN(), 5));
+        addCopies.add(new BookCopy(book3.getISBN(), 5));
+        addCopies.add(new BookCopy(book4.getISBN(), 5));
+        addCopies.add(new BookCopy(book5.getISBN(), 5));
+
+        Set<BookCopy> booksToRemove = new HashSet<>();
+        booksToRemove.add(new BookCopy(book1.getISBN(), 5));
+        booksToRemove.add(new BookCopy(book2.getISBN(), 5));
+        booksToRemove.add(new BookCopy(book3.getISBN(), 5));
+        booksToRemove.add(new BookCopy(book4.getISBN(), 5));
+        booksToRemove.add(new BookCopy(book5.getISBN(), 5));
+
+
+        Test2Client1 client1 = new Test2Client1(test2Number, addCopies, booksToRemove);
+        Test2Client2 client2 = new Test2Client2(test2Number);
+
+        client1.start();
+        client2.start();
+
+        client1.join();
+        client2.join();
+
+        assertTrue(test2Result);
     }
 }
