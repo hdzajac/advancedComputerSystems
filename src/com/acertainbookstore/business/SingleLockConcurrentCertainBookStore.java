@@ -99,8 +99,11 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 				
 			}
 
+<<<<<<< HEAD
 		}finally {lock.writeLock().unlock();}
 			
+=======
+>>>>>>> d2e61e511bacfe54c80ee09438961b49cfa6f209
 	}
 
 	/*

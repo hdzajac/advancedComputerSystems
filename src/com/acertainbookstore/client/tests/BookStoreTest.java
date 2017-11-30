@@ -99,7 +99,6 @@ public class BookStoreTest {
 		StockBook book = new ImmutableStockBook(isbn, "Test of Thrones", "George RR Testin'", (float) 10, copies, 0, 0,
 				0, false);
 		booksToAdd.add(book);
-		storeManager.addBooks(booksToAdd);
 	}
 
 	/**
@@ -119,7 +118,6 @@ public class BookStoreTest {
 	 *             the book store exception
 	 */
 	@Before
-	public void initializeBooks() throws BookStoreException {
 		Set<StockBook> booksToAdd = new HashSet<StockBook>();
 		booksToAdd.add(getDefaultBook());
 		storeManager.addBooks(booksToAdd);
@@ -296,7 +294,6 @@ public class BookStoreTest {
 
 		booksAdded.addAll(booksToAdd);
 
-		storeManager.addBooks(booksToAdd);
 
 		// Get books in store.
 		List<StockBook> listBooks = storeManager.getBooks();
@@ -319,7 +316,6 @@ public class BookStoreTest {
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 
-		storeManager.addBooks(booksToAdd);
 
 		// Get a list of ISBNs to retrieved.
 		Set<Integer> isbnList = new HashSet<Integer>();

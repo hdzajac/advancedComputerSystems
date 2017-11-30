@@ -33,6 +33,7 @@ public class ConcurrencyTest {
 
     public static boolean test2Result = true;
 
+
     public final static Integer SLEEP = 5;
 
 
@@ -97,7 +98,6 @@ public class ConcurrencyTest {
         Set<StockBook> booksToAdd = new HashSet<StockBook>();
         booksToAdd.add(getDefaultBook());
 
-        storeManager.addBooks(booksToAdd);
     }
 
     /**
@@ -105,7 +105,6 @@ public class ConcurrencyTest {
      * @throws BookStoreException
      */
     @Test
-    public void test1() throws BookStoreException, InterruptedException {
 
         int copies = 1000;
         int numberOfOperations = 1000;
@@ -139,6 +138,7 @@ public class ConcurrencyTest {
     }
 
 
+
     /**
      * Method to clean up the book store, execute after every test case is run.
      *
@@ -167,7 +167,7 @@ public class ConcurrencyTest {
     }
 
     @Test
-    public void test2SingleLock() throws BookStoreException, InterruptedException {
+    public void testAddBuyCopiesConcurrent() throws BookStoreException, InterruptedException {
 
         StockBook book1 = getDefaultBook();
         StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and JUnit2", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
@@ -211,4 +211,37 @@ public class ConcurrencyTest {
 
         assertTrue(test2Result);
     }
+
+    @Test
+    public void testAddRemoveBooksConcurrent() throws BookStoreException, InterruptedException {
+        StockBook book1 = getDefaultBook();
+        StockBook book2 = new ImmutableStockBook(TEST_ISBN + 1, "Harry Potter and JUnit2", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book3 = new ImmutableStockBook(TEST_ISBN + 2, "Harry Potter and JUnit3", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book4 = new ImmutableStockBook(TEST_ISBN + 3, "Harry Potter and JUnit4", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+        StockBook book5 = new ImmutableStockBook(TEST_ISBN + 4, "Harry Potter and JUnit5", "JK Unit", (float) 10, NUM_COPIES, 0, 0, 0,  false);
+
+        Set<StockBook> booksToAdd = new HashSet<>();
+        booksToAdd.add(book2);
+        booksToAdd.add(book3);
+        booksToAdd.add(book4);
+        booksToAdd.add(book5);
+
+        storeManager.addBooks(booksToAdd);
+
+        booksToAdd.add(book1);
+
+        Set<Integer> booksToRemove = booksToAdd.stream().map(Book::getISBN).collect(Collectors.toSet());
+
+        Test4Client1 client1 = new Test4Client1(test2Number, booksToAdd,booksToRemove);
+        Test4Client2 client2 = new Test4Client2(test2Number, booksToAdd.size());
+
+        client1.start();
+        client2.start();
+
+        client1.join();
+        client2.join();
+
+        assertTrue(testAddRemoveBooksConcurrentResult);
+    }
+
 }
