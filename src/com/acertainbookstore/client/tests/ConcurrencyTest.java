@@ -30,7 +30,7 @@ public class ConcurrencyTest {
     private static boolean localTest = true;
 
     /** Single lock test */
-    private static boolean singleLock = true;
+    private static boolean singleLock = false;
 
     private static final Integer test2Number = 1000;
 
@@ -117,8 +117,8 @@ public class ConcurrencyTest {
     @Test
     public void testBuyAndAddCopies() throws BookStoreException, InterruptedException {
 
-        int copies = 1000;
-        int numberOfOperations = 1000;
+        int copies = 100;
+        int numberOfOperations = 100;
 
         // configure the initial state
         Set<BookCopy> bookCopiesSet1 = new HashSet<BookCopy>();
@@ -145,7 +145,7 @@ public class ConcurrencyTest {
 
         StockBook bookAfter  = storeManager.getBooks().get(0);
 
-        assertTrue(1000005 == bookAfter.getNumCopies());
+        assertTrue(10005 == bookAfter.getNumCopies());
     }
 
 
