@@ -9,8 +9,11 @@ import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import org.junit.*;
 
+import java.net.Inet4Address;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 
@@ -32,7 +35,9 @@ public class ConcurrencyTest {
     private static final Integer test2Number = 1000;
 
     public static boolean test2Result = true;
+    public static boolean testAddRemoveBooksConcurrentResult = true;
 
+    public static boolean test3Result = true;
 
     public final static Integer SLEEP = 5;
 
@@ -98,6 +103,11 @@ public class ConcurrencyTest {
         Set<StockBook> booksToAdd = new HashSet<StockBook>();
         booksToAdd.add(getDefaultBook());
 
+        try {
+            storeManager.addBooks(booksToAdd);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -105,6 +115,7 @@ public class ConcurrencyTest {
      * @throws BookStoreException
      */
     @Test
+    public void testBuyAndAddCopies() throws BookStoreException, InterruptedException {
 
         int copies = 1000;
         int numberOfOperations = 1000;
@@ -137,6 +148,41 @@ public class ConcurrencyTest {
         assertTrue(1000005 == bookAfter.getNumCopies());
     }
 
+
+    @Test
+    public void testAddAndGetBooks() throws BookStoreException, InterruptedException {
+
+        int copies = 1000;
+        int numberOfOperations = 1000;
+
+        // configure the initial state
+        Set<BookCopy> bookCopiesSet1 = new HashSet<BookCopy>();
+        bookCopiesSet1.add(new BookCopy(TEST_ISBN, numberOfOperations * copies));
+
+        storeManager.addCopies(bookCopiesSet1);
+
+        HashSet<BookCopy> booksToBuy = new HashSet<BookCopy>();
+        booksToBuy.add(new BookCopy(TEST_ISBN, copies)); // valid
+
+        Set<BookCopy> bookCopiesSet = new HashSet<BookCopy>();
+        bookCopiesSet.add(new BookCopy(TEST_ISBN, copies));
+
+        List<StockBook> booksInStorePreTest = storeManager.getBooks();
+        // start client threads
+        Test3Client1 client1 = new Test3Client1(numberOfOperations,3044561);
+        Test3Client2 client2 = new Test3Client2(booksInStorePreTest,numberOfOperations);
+
+
+        client1.start();
+        Thread.sleep(500);
+        client2.start();
+
+        client1.join();
+        client2.join();
+
+
+        assertTrue(test3Result == true);
+    }
 
 
     /**
