@@ -48,7 +48,6 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addBooks(java.util.Set)
 	 */
-	public void addBooks(Set<StockBook> bookSet) throws BookStoreException {
 		if (bookSet == null) {
 			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
 		}
@@ -99,12 +98,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 				
 			}
 
-<<<<<<< HEAD
 		}finally {lock.writeLock().unlock();}
-			
-=======
->>>>>>> d2e61e511bacfe54c80ee09438961b49cfa6f209
-	}
 
 	/*
 	 * (non-Javadoc)
