@@ -43,7 +43,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addBooks(java.util.Set)
 	 */
-	public void addBooks(Set<StockBook> bookSet) throws BookStoreException {
+	public void addBooks(Set<StockBook> bookSet) throws BookStoreException, InterruptedException {
 		if (bookSet == null) {
 			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
 		}
@@ -83,6 +83,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 
 		for (StockBook book : bookSet) {
 			int isbn = book.getISBN();
+			Thread.sleep(100);
 			bookMap.put(isbn, new BookStoreBook(book));
 		}
 	}
