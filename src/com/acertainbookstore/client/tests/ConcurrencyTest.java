@@ -156,16 +156,7 @@ public class ConcurrencyTest {
         int numberOfOperations = 1000;
 
         // configure the initial state
-        Set<BookCopy> bookCopiesSet1 = new HashSet<BookCopy>();
-        bookCopiesSet1.add(new BookCopy(TEST_ISBN, numberOfOperations * copies));
 
-        storeManager.addCopies(bookCopiesSet1);
-
-        HashSet<BookCopy> booksToBuy = new HashSet<BookCopy>();
-        booksToBuy.add(new BookCopy(TEST_ISBN, copies)); // valid
-
-        Set<BookCopy> bookCopiesSet = new HashSet<BookCopy>();
-        bookCopiesSet.add(new BookCopy(TEST_ISBN, copies));
 
         List<StockBook> booksInStorePreTest = storeManager.getBooks();
         // start client threads
@@ -182,6 +173,49 @@ public class ConcurrencyTest {
 
 
         assertTrue(test3Result == true);
+    }
+
+
+    @Test
+    public void dirtyWrites() throws BookStoreException, InterruptedException {
+
+        int copies = 1;
+        int numberOfOperations = 1000;
+
+        // configure the initial state
+        Set<StockBook> booksToAdd = new HashSet<StockBook>();
+
+        Set<BookEditorPick> editorPicks = new HashSet<>();
+        Set<BookEditorPick> editorPicks2 = new HashSet<>();
+
+        for (int i = 1 ; i<= numberOfOperations; i++ )
+        {
+            booksToAdd.add(new ImmutableStockBook(TEST_ISBN + i, "Harry Potter and JUnit", "JK Unit", (float) 10, 5, 0, 0, 0,
+                    false));
+            editorPicks.add(new BookEditorPick(TEST_ISBN + i,true));
+        }
+
+        editorPicks2.add(new BookEditorPick(TEST_ISBN ,false));
+
+        storeManager.addBooks(booksToAdd);
+
+
+        // start client threads
+        Test5Client1 client1 = new Test5Client1(numberOfOperations,editorPicks);
+        Test5Client1 client2 = new Test5Client1(1,editorPicks2);
+
+
+        List<StockBook> bookInStoreAfterTest = storeManager.getBooks();
+        client1.start();
+        Thread.sleep(500);
+        client2.start();
+
+        client1.join();
+        client2.join();
+
+
+        assertTrue(bookInStoreAfterTest.get(0).isEditorPick() == false &&
+                bookInStoreAfterTest.size() == numberOfOperations + 1 );
     }
 
 
