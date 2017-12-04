@@ -22,7 +22,7 @@ public interface StockManager {
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */
-	public void addBooks(Set<StockBook> bookSet) throws BookStoreException, InterruptedException;
+	public void addBooks(Set<StockBook> bookSet) throws BookStoreException;
 
 	/**
 	 * Adds copies of the existing books to the bookstore.

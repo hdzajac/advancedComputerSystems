@@ -21,12 +21,9 @@ public class Test4Client1 extends Thread {
         for (int i = 0; i < test2Number; i++){
             try {
                 ConcurrencyTest.storeManager.removeBooks(removeBooks);
-                try {
+
 					ConcurrencyTest.storeManager.addBooks(booksToAdd);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+
             } catch (BookStoreException e) {
                 e.printStackTrace();
             }

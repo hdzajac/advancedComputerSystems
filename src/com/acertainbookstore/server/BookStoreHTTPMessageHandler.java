@@ -345,8 +345,6 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 			stockManager.addBooks(newBooks);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 
 		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);

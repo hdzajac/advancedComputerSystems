@@ -40,8 +40,6 @@ public class Test3Client1 extends Thread {
             }
             catch (BookStoreException ex) {
                 ex.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
 
 

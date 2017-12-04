@@ -30,7 +30,7 @@ public class ConcurrencyTest {
     private static boolean localTest = true;
 
     /** Single lock test */
-    private static boolean singleLock = false;
+    private static boolean singleLock = true;
 
     private static final Integer test2Number = 1000;
 
@@ -38,9 +38,6 @@ public class ConcurrencyTest {
     public static boolean testAddRemoveBooksConcurrentResult = true;
 
     public static boolean test3Result = true;
-
-    public final static Integer SLEEP = 5;
-
 
 
     /** The store manager. */
@@ -103,11 +100,8 @@ public class ConcurrencyTest {
         Set<StockBook> booksToAdd = new HashSet<StockBook>();
         booksToAdd.add(getDefaultBook());
 
-        try {
-            storeManager.addBooks(booksToAdd);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        storeManager.addBooks(booksToAdd);
+
     }
 
     /**

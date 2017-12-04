@@ -40,7 +40,7 @@ public class TwoLevelLockingConcurrentCertainBookStore implements BookStore, Sto
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addBooks(java.util.Set)
 	 */
-	public void addBooks(Set<StockBook> bookSet) throws BookStoreException, InterruptedException {
+	public void addBooks(Set<StockBook> bookSet) throws BookStoreException {
 		if (bookSet == null) {
 			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
 		}
@@ -138,11 +138,7 @@ public class TwoLevelLockingConcurrentCertainBookStore implements BookStore, Sto
 
 			// Update the number of copies
 			for (BookCopy bookCopy : bookCopiesSet) {
-				try {
-					Thread.sleep(Math.abs(r.nextInt())% ConcurrencyTest.SLEEP);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+
 				isbn = bookCopy.getISBN();
 				locks.get(isbn).writeLock().lock();
 				numCopies = bookCopy.getNumCopies();
@@ -259,11 +255,7 @@ public class TwoLevelLockingConcurrentCertainBookStore implements BookStore, Sto
 				Random r = new Random();
 
 				if (!book.areCopiesInStore(bookCopyToBuy.getNumCopies())) {
-					try {
-						Thread.sleep(Math.abs(r.nextInt())% ConcurrencyTest.SLEEP);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+
 					// If we cannot sell the copies of the book, it is a miss.
 					salesMisses.put(isbn, bookCopyToBuy.getNumCopies() - book.getNumCopies());
 					saleMiss = true;

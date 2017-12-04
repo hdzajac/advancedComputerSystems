@@ -149,8 +149,6 @@ public class StockManagerTest {
 			fail();
 		} catch (BookStoreException ex) {
 			;
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 
 		List<StockBook> booksInStorePostTest = storeManager.getBooks();
@@ -178,11 +176,9 @@ public class StockManagerTest {
 				-1, 0, 0, 0, false)); // invalid copies
 
 		try {
-			try {
-				storeManager.addBooks(booksToAdd);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+
+			storeManager.addBooks(booksToAdd);
+
 			fail();
 		} catch (BookStoreException ex) {
 			;
@@ -212,11 +208,9 @@ public class StockManagerTest {
 				5, 0, 0, 0, false)); // invalid price
 
 		try {
-			try {
-				storeManager.addBooks(booksToAdd);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+
+			storeManager.addBooks(booksToAdd);
+
 			fail();
 		} catch (BookStoreException ex) {
 			;
@@ -417,11 +411,8 @@ public class StockManagerTest {
 		booksAdded.addAll(booksToAdd);
 
 		// Add books in bookstore.
-		try {
-			storeManager.addBooks(booksToAdd);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		storeManager.addBooks(booksToAdd);
+
 
 		List<StockBook> booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
@@ -455,11 +446,8 @@ public class StockManagerTest {
 				(float) 300, NUM_COPIES, 0, 0, 0, false));
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		try {
-			storeManager.addBooks(booksToAdd);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		storeManager.addBooks(booksToAdd);
+
 
 		Set<Integer> isbnSet = new HashSet<Integer>();
 		isbnSet.add(TEST_ISBN + 1);
@@ -482,11 +470,9 @@ public class StockManagerTest {
 				(float) 300, NUM_COPIES, 0, 0, 0, false));
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-		try {
-			storeManager.addBooks(booksToAdd);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+
+		storeManager.addBooks(booksToAdd);
+
 
 		List<StockBook> booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.size() == 3);

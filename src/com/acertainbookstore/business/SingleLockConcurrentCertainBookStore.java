@@ -48,7 +48,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 	 * @see
 	 * com.acertainbookstore.interfaces.StockManager#addBooks(java.util.Set)
 	 */
-	public void addBooks(Set<StockBook> bookSet) throws BookStoreException, InterruptedException {
+	public void addBooks(Set<StockBook> bookSet) throws BookStoreException {
 		if (bookSet == null) {
 			throw new BookStoreException(BookStoreConstants.NULL_INPUT);
 		}
@@ -136,20 +136,14 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 			}
 
 			BookStoreBook book;
-			Random r = new Random();
 
 			// Update the number of copies
 			for (BookCopy bookCopy : bookCopiesSet) {
-				try {
-					Thread.sleep(Math.abs(r.nextInt())%ConcurrencyTest.SLEEP);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+
 				isbn = bookCopy.getISBN();
 				numCopies = bookCopy.getNumCopies();
 				book = bookMap.get(isbn);
-				for (int j = 0; j < numCopies;j++)
-					book.addCopies(1);
+				book.addCopies(numCopies);
 			}
 		}finally {lock.writeLock().unlock();}
 		
@@ -204,7 +198,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 			for (BookEditorPick editorPickArg : editorPicks) {
 				bookMap.get(editorPickArg.getISBN()).setEditorPick(editorPickArg.isEditorPick());
 			}
-		} finally {lock.readLock().unlock();}
+		} finally {lock.writeLock().unlock();}
 		
 	}
 
@@ -247,15 +241,9 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 				}
 
 				book = bookMap.get(isbn);
-				Random r = new Random();
 
 				if (!book.areCopiesInStore(bookCopyToBuy.getNumCopies())) {
-					try {
-						Thread.sleep(Math.abs(r.nextInt())% ConcurrencyTest.SLEEP);
-					} catch (InterruptedException e) {
-						lock.writeLock().unlock();
-						e.printStackTrace();
-					}
+
 					// If we cannot sell the copies of the book, it is a miss.
 					salesMisses.put(isbn, bookCopyToBuy.getNumCopies() - book.getNumCopies());
 					saleMiss = true;
@@ -276,8 +264,7 @@ public class SingleLockConcurrentCertainBookStore implements BookStore, StockMan
 			// Then make the purchase.
 			for (BookCopy bookCopyToBuy : bookCopiesToBuy) {
 				book = bookMap.get(bookCopyToBuy.getISBN());
-				for (int j = 0; j < bookCopyToBuy.getNumCopies();j++)
-					book.buyCopies(1);
+				book.buyCopies(bookCopyToBuy.getNumCopies());
 			}
 		} finally {lock.writeLock().unlock();}
 		
