@@ -37,6 +37,11 @@ public class BookSetGenerator {
 		l.addAll(isbns);
 		Collections.shuffle(l);
 		return new HashSet<Integer>(l.subList(0, num));
+		List<Integer> sl = new ArrayList<Integer>();
+		for(int i=0; i<num;i++) {
+			sl.add(l.get(i));
+		}
+		return new HashSet<Integer>(sl);
 	}
 
 	/**
