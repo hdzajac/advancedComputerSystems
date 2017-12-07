@@ -3,15 +3,21 @@
  */
 package com.acertainbookstore.client.workloads;
 
+<<<<<<< HEAD
 import java.util.HashSet;
+=======
+>>>>>>> c39de7e01939c34ccae23130e6f7905541c6db4e
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+<<<<<<< HEAD
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.interfaces.BookStore;
+=======
+>>>>>>> c39de7e01939c34ccae23130e6f7905541c6db4e
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreException;
 
@@ -114,7 +120,6 @@ public class Worker implements Callable<WorkerRunResult> {
      * @throws BookStoreException
      */
     private void runFrequentStockManagerInteraction() throws BookStoreException {
-	// TODO: Add code for Stock Replenishment Interaction
     }
 
     /**
