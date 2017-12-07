@@ -108,8 +108,7 @@ public class CertainWorkload {
 	 */
 	public static void initializeBookStoreData(BookStore bookStore,
 			StockManager stockManager) throws BookStoreException {
-
-		// TODO: You should initialize data for your bookstore here
+		
 		BookSetGenerator generator = new BookSetGenerator();
 		Set<StockBook> initialStock = generator.nextSetOfStockBooks(NUMBER_OF_BOOKS);
 		stockManager.addBooks(initialStock);
