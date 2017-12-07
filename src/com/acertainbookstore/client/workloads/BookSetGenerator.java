@@ -18,12 +18,12 @@ public class BookSetGenerator {
 
 
 	private Random rnd;
-	private StringBuilder sb ;
+
 
 	public BookSetGenerator() {
 		// TODO Auto-generated constructor stub
 		rnd = new Random();
-		sb = new StringBuilder();
+
 	}
 
 	/**
@@ -36,12 +36,11 @@ public class BookSetGenerator {
 		List<Integer> l = new ArrayList<>();
 		l.addAll(isbns);
 		Collections.shuffle(l);
-		return new HashSet<Integer>(l.subList(0, num));
-		List<Integer> sl = new ArrayList<Integer>();
+		List<Integer> sl = new ArrayList<>();
 		for(int i=0; i<num;i++) {
 			sl.add(l.get(i));
 		}
-		return new HashSet<Integer>(sl);
+		return new HashSet<>(sl);
 	}
 
 	/**
@@ -85,6 +84,7 @@ public class BookSetGenerator {
 	// Generates a random string of lower-case characters of length 'len'
 	private String rndString(int len) {
 		char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+		StringBuilder sb = new StringBuilder();
 		char c;
 		for (int i = 0; i < len; i++) {
 			c = chars[rnd.nextInt(chars.length)];
