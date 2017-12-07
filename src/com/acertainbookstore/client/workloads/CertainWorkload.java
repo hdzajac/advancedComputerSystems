@@ -3,6 +3,10 @@
  */
 package com.acertainbookstore.client.workloads;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +34,7 @@ public class CertainWorkload {
 
 
 	public static int NUMBER_OF_BOOKS = 1000;
+	private static String RESULT_FILE_NAME = "results.txt";
 
 
 	/**
@@ -96,8 +101,14 @@ public class CertainWorkload {
 	 * 
 	 * @param workerRunResults
 	 */
-	public static void reportMetric(List<WorkerRunResult> workerRunResults) {
-		// TODO: You should aggregate metrics and output them for plotting here
+	public static void reportMetric(List<WorkerRunResult> workerRunResults) throws IOException {
+		FileWriter fw = new FileWriter(RESULT_FILE_NAME);
+		PrintWriter pw = new PrintWriter(fw);
+
+
+		pw.println("| Total runs\t |\tTime [n]   |Succ Interactions | Total Frq Int | Succ Frq Int |");
+		workerRunResults.forEach(r -> pw.println(String.format("|\t\t%d\t\t |\t%d | %d \t\t\t  | %d \t\t  | %d \t\t |",r.getTotalRuns(), r.getElapsedTimeInNanoSecs(), r.getSuccessfulInteractions(), r.getTotalFrequentBookStoreInteractionRuns(), r.getSuccessfulFrequentBookStoreInteractionRuns())));
+		pw.close();
 	}
 
 	/**
