@@ -3,7 +3,6 @@
  */
 package com.acertainbookstore.client.workloads;
 
-<<<<<<< HEAD
 import java.util.HashSet;
 import java.util.Comparator;
 import java.util.List;
