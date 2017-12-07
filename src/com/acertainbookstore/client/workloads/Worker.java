@@ -3,9 +3,16 @@
  */
 package com.acertainbookstore.client.workloads;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
+import com.acertainbookstore.business.Book;
+import com.acertainbookstore.business.BookCopy;
+import com.acertainbookstore.interfaces.BookStore;
+import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreException;
 
 /**
@@ -116,7 +123,27 @@ public class Worker implements Callable<WorkerRunResult> {
      * @throws BookStoreException
      */
     private void runFrequentBookStoreInteraction() throws BookStoreException {
-	// TODO: Add code for Customer Interaction
+    	StockManager sm = configuration.getStockManager();
+    	BookStore bs = configuration.getBookStore();
+    	BookSetGenerator bsg = configuration.getBookSetGenerator();
+    	
+    	// Gets editor picks
+    	List<Book> lep = bs.getEditorPicks(configuration.getNumEditorPicksToGet());
+    	Set<Integer> isbns = new HashSet<Integer>();
+    	for(Book b : lep) {
+    		Integer isbn = b.getISBN();
+    		isbns.add(isbn);
+    	}
+    	
+    	// Selects a subset of the books returned by calling sampleFromSetOfISBNs
+    	Set<Integer> sample = bsg.sampleFromSetOfISBNs(isbns, configuration.getNumBooksToBuy());
+    	Set<BookCopy> booksToBuy = new HashSet<BookCopy>();
+		for(Integer isbn : sample) {
+			booksToBuy.add(new BookCopy(isbn, configuration.getNumBookCopiesToBuy()));
+		}
+		
+		// Buys the books selected by calling buyBooks
+		bs.buyBooks(booksToBuy);
     }
 
 }
