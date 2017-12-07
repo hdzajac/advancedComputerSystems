@@ -3,9 +3,16 @@
  */
 package com.acertainbookstore.client.workloads;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
+import com.acertainbookstore.business.BookCopy;
+import com.acertainbookstore.business.StockBook;
+import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreException;
 
 /**
@@ -107,7 +114,20 @@ public class Worker implements Callable<WorkerRunResult> {
      * @throws BookStoreException
      */
     private void runFrequentStockManagerInteraction() throws BookStoreException {
-	// TODO: Add code for Stock Replenishment Interaction
+		StockManager sm = configuration.getStockManager();
+		Integer k = configuration.getNumBooksWithLeastCopies();
+		Integer numberAddCopies = configuration.getNumAddCopies();
+
+		List<StockBook> kSmallest = sm.getBooks().stream()
+				.sorted(Comparator.comparingInt(StockBook::getNumCopies))
+				.limit(k)
+				.collect(Collectors.toList());
+
+		Set<BookCopy> kCopies = kSmallest.parallelStream()
+				.map(b -> new BookCopy(b.getISBN(), numberAddCopies ))
+				.collect(Collectors.toSet());
+
+		sm.addCopies(kCopies);
     }
 
     /**
