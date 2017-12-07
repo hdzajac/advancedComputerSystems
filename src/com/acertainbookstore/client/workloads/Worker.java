@@ -112,7 +112,7 @@ public class Worker implements Callable<WorkerRunResult> {
 		Random rnd = new Random();
 		List<StockBook> listBooks = configuration.getStockManager().getBooks();
 		List<Integer> isbns = listBooks.stream().map(Book::getISBN).collect(Collectors.toList());
-		Set<StockBook>  randomBookSet = configuration.getBookSetGenerator().nextSetOfStockBooks(rnd.nextInt());
+		Set<StockBook>  randomBookSet = configuration.getBookSetGenerator().nextSetOfStockBooks(rnd.nextInt((50 - 5) + 1) + 5);
 		Set<StockBook>  booksToAdd  =  new HashSet<>();
 		for (StockBook book : randomBookSet) {
 			if(!isbns.contains(book.getISBN())){

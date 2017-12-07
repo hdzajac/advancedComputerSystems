@@ -16,8 +16,14 @@ import com.acertainbookstore.business.StockBook;
  */
 public class BookSetGenerator {
 
+
+	private Random rnd;
+	private StringBuilder sb ;
+
 	public BookSetGenerator() {
 		// TODO Auto-generated constructor stub
+		rnd = new Random();
+		sb = new StringBuilder();
 	}
 
 	/**
@@ -40,20 +46,22 @@ public class BookSetGenerator {
 	 * @return
 	 */
 	public Set<StockBook> nextSetOfStockBooks(int num) {
-		Random rnd = new Random();
 		List<StockBook> l = new ArrayList<StockBook>();
-		
+		int isbn, numCopies;
+		long numSaleMisses, numTimesRated, totalRating;
+		float price;
+		boolean editorPick;
+
 		for(int i = 0; i< num; i++) {
-			int isbn = rnd.nextInt(5000)+i;;
+			isbn = rnd.nextInt(5000)+i;;
 			String title = rndString(30);
 			String author = rndString(15);
-			float price = rnd.nextFloat()*50;
-			int numCopies = rnd.nextInt(5)+1;
-			long numSaleMisses = rndLong(0, 100);
-			long numTimesRated = rndLong(0, 100);
-			long totalRating = rndLong(0, 5);
-			boolean editorPick = rnd.nextBoolean();
-			
+			price = rnd.nextFloat()*50;
+			numCopies = rnd.nextInt(5)+1;
+			numSaleMisses = rndLong(0, 100);
+			numTimesRated = rndLong(0, 100);
+			totalRating = rndLong(0, 5);
+			editorPick = rnd.nextBoolean();
 			ImmutableStockBook isb = new ImmutableStockBook(isbn,title,author,price,numCopies,numSaleMisses,numTimesRated, totalRating, editorPick);
 			l.add(isb);
 		}
@@ -63,7 +71,7 @@ public class BookSetGenerator {
 	
 	// Generates a random long number between min and max
 	private long rndLong(long min, long max) {
-		 Random rnd = new Random();
+
 
 		 long rndlong = min + (long)(rnd.nextDouble()*(max - min));
 		 return rndlong;
@@ -72,10 +80,9 @@ public class BookSetGenerator {
 	// Generates a random string of lower-case characters of length 'len'
 	private String rndString(int len) {
 		char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-		StringBuilder sb = new StringBuilder();
-		Random random = new Random();
+		char c;
 		for (int i = 0; i < len; i++) {
-		    char c = chars[random.nextInt(chars.length)];
+			c = chars[rnd.nextInt(chars.length)];
 		    sb.append(c);
 		}
 		String output = sb.toString();
