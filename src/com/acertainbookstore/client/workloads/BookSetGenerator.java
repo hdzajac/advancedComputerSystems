@@ -44,7 +44,7 @@ public class BookSetGenerator {
 		List<StockBook> l = new ArrayList<StockBook>();
 		
 		for(int i = 0; i< num; i++) {
-			int isbn = i;
+			int isbn = rnd.nextInt(5000)+i;;
 			String title = rndString(30);
 			String author = rndString(15);
 			float price = rnd.nextFloat()*50;
