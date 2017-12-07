@@ -93,6 +93,8 @@ public class CertainWorkload {
 			((StockManagerHTTPProxy) stockManager).stop();
 		}
 
+		WorkloadConfiguration config =  new WorkloadConfiguration(bookStore,
+				stockManager);
 		reportMetric(workerRunResults);
 	}
 
@@ -102,12 +104,19 @@ public class CertainWorkload {
 	 * @param workerRunResults
 	 */
 	public static void reportMetric(List<WorkerRunResult> workerRunResults) throws IOException {
-		FileWriter fw = new FileWriter(RESULT_FILE_NAME);
+		FileWriter fw = new FileWriter(RESULT_FILE_NAME,true);
 		PrintWriter pw = new PrintWriter(fw);
 
 
-		pw.println("| Total runs\t |\tTime [n]   |Succ Interactions | Total Frq Int | Succ Frq Int |");
-		workerRunResults.forEach(r -> pw.println(String.format("|\t\t%d\t\t |\t%d | %d \t\t\t  | %d \t\t  | %d \t\t |",r.getTotalRuns(), r.getElapsedTimeInNanoSecs(), r.getSuccessfulInteractions(), r.getTotalFrequentBookStoreInteractionRuns(), r.getSuccessfulFrequentBookStoreInteractionRuns())));
+		double throughput = 0;
+		double latency = 0;
+		for(WorkerRunResult w : workerRunResults)
+		{
+			throughput += (float) w.getSuccessfulInteractions() / (w.getElapsedTimeInNanoSecs()/1000) ;
+		}
+
+		latency = 1/ throughput;
+		pw.printf("%d %.6f %.6f \n",workerRunResults.size(),throughput, latency);
 		pw.close();
 	}
 
