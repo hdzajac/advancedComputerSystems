@@ -9,7 +9,7 @@ public final class BookStoreConstants {
 	/**
 	 * The Constant BINARY_SERIALIZATION decides whether we use Kryo or XStream.
 	 */
-	public static final boolean BINARY_SERIALIZATION = true;
+	public static final boolean BINARY_SERIALIZATION = false;
 
 	// Constants used when creating URLs
 
@@ -56,9 +56,6 @@ public final class BookStoreConstants {
 
 	/** The Constant PROPERTY_KEY_LOCAL_TEST. */
 	public static final String PROPERTY_KEY_LOCAL_TEST = "localtest";
-	
-	/** The Constant PROPERTY_KEY_SINGLE_LOCK. */
-	public static final String PROPERTY_KEY_SINGLE_LOCK = "singlelock";
 
 	/** The Constant PROPERTY_KEY_SERVER_PORT. */
 	public static final String PROPERTY_KEY_SERVER_PORT = "port";

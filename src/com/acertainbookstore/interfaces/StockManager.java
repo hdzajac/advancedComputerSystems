@@ -25,10 +25,6 @@ public interface StockManager {
 	public void addBooks(Set<StockBook> bookSet) throws BookStoreException;
 
 	/**
-	 * Adds copies of the existing books to the bookstore.
-	 *
-	 * @param bookCopiesSet
-	 *            the book copies set
 	 * @throws BookStoreException
 	 *             the book store exception
 	 */

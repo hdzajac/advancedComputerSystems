@@ -14,10 +14,9 @@ import org.junit.Test;
 
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
-import com.acertainbookstore.business.SingleLockConcurrentCertainBookStore;
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.business.TwoLevelLockingConcurrentCertainBookStore;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
 import com.acertainbookstore.client.StockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
@@ -41,10 +40,6 @@ public class BookStoreTest {
 	/** The local test. */
 	private static boolean localTest = true;
 
-	/** Single lock test */
-	private static boolean singleLock = true;
-
-	
 	/** The store manager. */
 	private static StockManager storeManager;
 
@@ -59,20 +54,11 @@ public class BookStoreTest {
 		try {
 			String localTestProperty = System.getProperty(BookStoreConstants.PROPERTY_KEY_LOCAL_TEST);
 			localTest = (localTestProperty != null) ? Boolean.parseBoolean(localTestProperty) : localTest;
-			
-			String singleLockProperty = System.getProperty(BookStoreConstants.PROPERTY_KEY_SINGLE_LOCK);
-			singleLock = (singleLockProperty != null) ? Boolean.parseBoolean(singleLockProperty) : singleLock;
 
 			if (localTest) {
-				if (singleLock) {
-					SingleLockConcurrentCertainBookStore store = new SingleLockConcurrentCertainBookStore();
-					storeManager = store;
-					client = store;
-				} else {
-					TwoLevelLockingConcurrentCertainBookStore store = new TwoLevelLockingConcurrentCertainBookStore();
-					storeManager = store;
-					client = store;
-				}
+				CertainBookStore store = new CertainBookStore();
+				storeManager = store;
+				client = store;
 			} else {
 				storeManager = new StockManagerHTTPProxy("http://localhost:8081/stock");
 				client = new BookStoreHTTPProxy("http://localhost:8081");
@@ -100,7 +86,6 @@ public class BookStoreTest {
 				0, false);
 		booksToAdd.add(book);
 		storeManager.addBooks(booksToAdd);
-
 	}
 
 	/**
@@ -299,7 +284,6 @@ public class BookStoreTest {
 
 		storeManager.addBooks(booksToAdd);
 
-
 		// Get books in store.
 		List<StockBook> listBooks = storeManager.getBooks();
 
@@ -321,9 +305,7 @@ public class BookStoreTest {
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 
-
 		storeManager.addBooks(booksToAdd);
-
 
 		// Get a list of ISBNs to retrieved.
 		Set<Integer> isbnList = new HashSet<Integer>();

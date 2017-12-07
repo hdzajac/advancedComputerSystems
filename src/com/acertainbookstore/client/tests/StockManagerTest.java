@@ -16,7 +16,7 @@ import org.junit.Test;
 import com.acertainbookstore.business.Book;
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookEditorPick;
-import com.acertainbookstore.business.SingleLockConcurrentCertainBookStore;
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.client.BookStoreHTTPProxy;
@@ -58,7 +58,7 @@ public class StockManagerTest {
 			localTest = (localTestProperty != null) ? Boolean.parseBoolean(localTestProperty) : localTest;
 			
 			if (localTest) {
-				SingleLockConcurrentCertainBookStore store = new SingleLockConcurrentCertainBookStore();
+				CertainBookStore store = new CertainBookStore();
 				storeManager = store;
 				client = store;
 			} else {
@@ -89,7 +89,7 @@ public class StockManagerTest {
 	 *             the book store exception
 	 */
 	@Before
-	public void initializeBooks() throws BookStoreException, InterruptedException {
+	public void initializeBooks() throws BookStoreException {
 		Set<StockBook> booksToAdd = new HashSet<StockBook>();
 		booksToAdd.add(getDefaultBook());
 
@@ -176,9 +176,7 @@ public class StockManagerTest {
 				-1, 0, 0, 0, false)); // invalid copies
 
 		try {
-
 			storeManager.addBooks(booksToAdd);
-
 			fail();
 		} catch (BookStoreException ex) {
 			;
@@ -208,9 +206,7 @@ public class StockManagerTest {
 				5, 0, 0, 0, false)); // invalid price
 
 		try {
-
 			storeManager.addBooks(booksToAdd);
-
 			fail();
 		} catch (BookStoreException ex) {
 			;
@@ -413,7 +409,6 @@ public class StockManagerTest {
 		// Add books in bookstore.
 		storeManager.addBooks(booksToAdd);
 
-
 		List<StockBook> booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.containsAll(booksAdded) && booksInStoreList.size() == booksAdded.size());
 
@@ -448,7 +443,6 @@ public class StockManagerTest {
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 		storeManager.addBooks(booksToAdd);
 
-
 		Set<Integer> isbnSet = new HashSet<Integer>();
 		isbnSet.add(TEST_ISBN + 1);
 		isbnSet.add(TEST_ISBN + 2);
@@ -470,9 +464,7 @@ public class StockManagerTest {
 				(float) 300, NUM_COPIES, 0, 0, 0, false));
 		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
 				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
-
 		storeManager.addBooks(booksToAdd);
-
 
 		List<StockBook> booksInStoreList = storeManager.getBooks();
 		assertTrue(booksInStoreList.size() == 3);

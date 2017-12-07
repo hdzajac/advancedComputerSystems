@@ -13,11 +13,10 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookEditorPick;
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreKryoSerializer;
-import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.BookStoreSerializer;
-import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreXStreamSerializer;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
@@ -37,11 +36,9 @@ import com.esotericsoftware.kryo.io.Input;
  * @see CertainBookStore
  */
 public class BookStoreHTTPMessageHandler extends AbstractHandler {
+
 	/** The book store. */
-	private BookStore bookStore = null;
-	
-	/** The stock manager. */
-	private StockManager stockManager = null;
+	private CertainBookStore myBookStore = null;
 
 	/** The serializer. */
 	private static ThreadLocal<BookStoreSerializer> serializer;
@@ -52,9 +49,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	 * @param bookStore
 	 *            the book store
 	 */
-	public BookStoreHTTPMessageHandler(BookStore bookStore, StockManager stockManager) {
-		this.bookStore = bookStore;
-		this.stockManager = stockManager;
+	public BookStoreHTTPMessageHandler(CertainBookStore bookStore) {
+		myBookStore = bookStore;
 
 		// Setup the type of serializer.
 		if (BookStoreConstants.BINARY_SERIALIZATION) {
@@ -161,7 +157,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			bookStoreResponse.setList(stockManager.getBooksByISBN(isbnSet));
+			bookStoreResponse.setList(myBookStore.getBooksByISBN(isbnSet));
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -186,7 +182,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		try {
 			int numBooks = BookStoreUtility.convertStringToInt(numBooksString);
-			bookStoreResponse.setList(bookStore.getEditorPicks(numBooks));
+			bookStoreResponse.setList(myBookStore.getEditorPicks(numBooks));
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -213,7 +209,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			bookStoreResponse.setList(bookStore.getBooks(isbnSet));
+			bookStoreResponse.setList(myBookStore.getBooks(isbnSet));
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -240,7 +236,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			bookStore.buyBooks(bookCopiesToBuy);
+			myBookStore.buyBooks(bookCopiesToBuy);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -268,7 +264,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			stockManager.updateEditorPicks(mapEditorPicksValues);
+			myBookStore.updateEditorPicks(mapEditorPicksValues);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -287,11 +283,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	 */
 	private void listBooks(HttpServletResponse response) throws IOException {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-		try {
-			bookStoreResponse.setList(stockManager.getBooks());
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+		bookStoreResponse.setList(myBookStore.getBooks());
 
 		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
 		response.getOutputStream().write(serializedResponseContent);
@@ -315,7 +307,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			stockManager.addCopies(listBookCopies);
+			myBookStore.addCopies(listBookCopies);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -342,7 +334,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			stockManager.addBooks(newBooks);
+			myBookStore.addBooks(newBooks);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -363,7 +355,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			stockManager.removeAllBooks();
+			myBookStore.removeAllBooks();
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -390,7 +382,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			stockManager.removeBooks(bookSet);
+			myBookStore.removeBooks(bookSet);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}

@@ -1,9 +1,8 @@
 package com.acertainbookstore.server;
 
-import com.acertainbookstore.business.SingleLockConcurrentCertainBookStore;
-import com.acertainbookstore.business.TwoLevelLockingConcurrentCertainBookStore;
-
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+
+import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.utils.BookStoreConstants;
 
 /**
@@ -16,11 +15,6 @@ public class BookStoreHTTPServer {
 	private static final int DEFAULT_PORT = 8081;
 	private static final int MIN_THREADPOOL_SIZE = 10;
 	private static final int MAX_THREADPOOL_SIZE = 100;
-	
-	/** The constant, defining which locking scheme implementation to use
-	 *  true - single lock 
-	 *  false - two-level locking */
-	private static final boolean SINGLE_LOCK = true;
 
 	/**
 	 * Prevents the instantiation of a new {@link BookStoreHTTPServer}.
@@ -36,20 +30,10 @@ public class BookStoreHTTPServer {
 	 *            the arguments
 	 */
 	public static void main(String[] args) {
+		CertainBookStore bookStore = new CertainBookStore();
 		int listenOnPort = DEFAULT_PORT;
-		
-		BookStoreHTTPMessageHandler handler = null;
-		
-		if (SINGLE_LOCK) {
-			SingleLockConcurrentCertainBookStore bookStore = new SingleLockConcurrentCertainBookStore();
-			/* we pass bookStore to BookStoreHTTPMessageHandler constructor twice, 
-			 * since it implements both interfaces: BookStore and StockManager */
-			handler = new BookStoreHTTPMessageHandler(bookStore, bookStore);
-		} else {
-			TwoLevelLockingConcurrentCertainBookStore bookStore = new TwoLevelLockingConcurrentCertainBookStore();
-			handler = new BookStoreHTTPMessageHandler(bookStore, bookStore);
-		}		
-		
+
+		BookStoreHTTPMessageHandler handler = new BookStoreHTTPMessageHandler(bookStore);
 		String serverPortString = System.getProperty(BookStoreConstants.PROPERTY_KEY_SERVER_PORT);
 
 		if (serverPortString != null) {
