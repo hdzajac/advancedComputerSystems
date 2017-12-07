@@ -138,7 +138,7 @@ public class Worker implements Callable<WorkerRunResult> {
 				.limit(k)
 				.collect(Collectors.toList());
 
-		Set<BookCopy> kCopies = kSmallest.parallelStream()
+		Set<BookCopy> kCopies = kSmallest.stream()
 				.map(b -> new BookCopy(b.getISBN(), numberAddCopies ))
 				.collect(Collectors.toSet());
 
