@@ -34,11 +34,9 @@ public class MasterCertainBookStore extends ReadOnlyCertainBookStore
 
 	/**
 	 * Instantiates a new master certain book store.
-	 *
-	 * @throws BookStoreException
-	 *             the book store exception
+	 * @throws Exception 
 	 */
-	public MasterCertainBookStore() throws BookStoreException {
+	public MasterCertainBookStore() throws Exception {
 		Set<String> slaveServers = initializeSlaveMapping();
 		bookStore = new CertainBookStore();
 

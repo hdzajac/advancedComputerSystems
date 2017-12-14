@@ -32,10 +32,9 @@ public class MasterBookStoreHTTPServer {
 	 *
 	 * @param args
 	 *            the arguments
-	 * @throws BookStoreException
-	 *             the book store exception
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws BookStoreException {
+	public static void main(String[] args) throws Exception {
 		MasterCertainBookStore bookStore = new MasterCertainBookStore();
 		int listenOnPort = DEFAULT_PORT;
 

@@ -1,6 +1,7 @@
 package com.acertainbookstore.server;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Set;
 
@@ -11,12 +12,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.acertainbookstore.business.ReplicationRequest;
+import com.acertainbookstore.business.ReplicationResult;
 import com.acertainbookstore.business.SlaveCertainBookStore;
 import com.acertainbookstore.interfaces.BookStoreSerializer;
 import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import com.acertainbookstore.utils.BookStoreKryoSerializer;
 import com.acertainbookstore.utils.BookStoreMessageTag;
+import com.acertainbookstore.utils.BookStoreRequest;
 import com.acertainbookstore.utils.BookStoreResponse;
 import com.acertainbookstore.utils.BookStoreResult;
 import com.acertainbookstore.utils.BookStoreUtility;
@@ -83,7 +87,33 @@ public class SlaveBookStoreHTTPMessageHandler extends AbstractHandler {
 			System.err.println("No message tag.");
 		} else {
 			switch (messageTag) {
+			case ADDBOOKS:
+				replicateHandler(request, response, messageTag);
+				break;
 
+			/** The tag for the add copies message. */
+			case ADDCOPIES:
+				replicateHandler(request,response, messageTag);
+				break;
+
+			/** The tag for the buy books message. */
+			case BUYBOOKS:
+				replicateHandler(request, response, messageTag);
+				break;
+
+			/** The tag for the update editor picks message. */
+			case UPDATEEDITORPICKS:
+				replicateHandler(request,response, messageTag);
+				break;
+			/** The tag for the remove all books message. */
+			case REMOVEALLBOOKS:
+				replicateHandler(request,response, messageTag);
+				break;
+			/** The tag for the remove books message. */
+			case REMOVEBOOKS:
+				replicateHandler(request,response, messageTag);
+				break;
+				
 			case LISTBOOKS:
 				listBooks(response);
 				break;
@@ -109,6 +139,33 @@ public class SlaveBookStoreHTTPMessageHandler extends AbstractHandler {
 		// Mark the request as handled so that the HTTP response can be sent
 		baseRequest.setHandled(true);
 	}
+
+	
+		
+	
+	private void replicateHandler(HttpServletRequest request, HttpServletResponse response, BookStoreMessageTag messageTag) throws IOException {
+		byte[] serializedRequestContent = getSerializedRequestContent(request);
+		Set<?> dataSet = (Set<?>) serializer.get().deserialize(serializedRequestContent);
+		
+		ReplicationRequest req = new ReplicationRequest(dataSet, messageTag);
+		BookStoreResponse bookStoreResult = new BookStoreResponse();
+		try {
+			ReplicationResult res = myBookStore.replicate(req);
+			
+			if (!res.isReplicationSuccessful()) {
+				bookStoreResult.setException(new BookStoreException());
+			}
+			
+		} catch (BookStoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResult);
+		response.getOutputStream().write(serializedResponseContent);
+	}
+
+	
 
 	/**
 	 * Gets the stock books by ISBN.

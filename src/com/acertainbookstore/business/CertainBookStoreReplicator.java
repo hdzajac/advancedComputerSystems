@@ -29,8 +29,9 @@ public class CertainBookStoreReplicator implements Replicator {
 	 *            the max replicator threads
 	 * @param slaveServers
 	 *            the slave servers
+	 * @throws Exception 
 	 */
-	public CertainBookStoreReplicator(int maxReplicatorThreads, Set<String> slaveServers) {
+	public CertainBookStoreReplicator(int maxReplicatorThreads, Set<String> slaveServers) throws Exception {
 		if (slaveServers == null) {
 			return;
 		}
@@ -74,7 +75,12 @@ public class CertainBookStoreReplicator implements Replicator {
 	public void markServersFaulty(Set<String> faultyServers) {
 		if (faultyServers != null) {
 			for (String aFaultyServer : faultyServers) {
-				((ReplicationAwareServerHTTPProxy) replicationClients.get(aFaultyServer)).stop();
+				try {
+					((ReplicationAwareServerHTTPProxy) replicationClients.get(aFaultyServer)).stop();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				replicationClients.remove(aFaultyServer);
 			}
 		}
