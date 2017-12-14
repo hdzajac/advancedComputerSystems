@@ -3,6 +3,7 @@ package com.acertainbookstore.business;
 import java.util.concurrent.Callable;
 
 import com.acertainbookstore.interfaces.Replication;
+import com.acertainbookstore.utils.BookStoreException;
 
 /**
  * {@link CertainBookStoreReplicationTask} performs replication to a slave
@@ -10,6 +11,9 @@ import com.acertainbookstore.interfaces.Replication;
  * {@link ReplicationResult}.
  */
 public class CertainBookStoreReplicationTask implements Callable<ReplicationResult> {
+
+	private Replication replicationClient;
+	private ReplicationRequest replicationRequest;
 
 	/**
 	 * Instantiates a new certain book store replication task.
@@ -20,7 +24,8 @@ public class CertainBookStoreReplicationTask implements Callable<ReplicationResu
 	 *            the request
 	 */
 	public CertainBookStoreReplicationTask(Replication replicationClient, ReplicationRequest request) {
-		throw new UnsupportedOperationException();
+		this.replicationClient = replicationClient;
+		this.replicationRequest = request;
 	}
 
 	/*
@@ -29,7 +34,7 @@ public class CertainBookStoreReplicationTask implements Callable<ReplicationResu
 	 * @see java.util.concurrent.Callable#call()
 	 */
 	@Override
-	public ReplicationResult call() {
-		throw new UnsupportedOperationException();
+	public ReplicationResult call() throws BookStoreException {
+		return replicationClient.replicate(replicationRequest);
 	}
 }
