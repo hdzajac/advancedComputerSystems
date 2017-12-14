@@ -2,10 +2,7 @@ package com.acertainbookstore.client;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
@@ -106,7 +103,11 @@ public class ReplicationAwareStockManagerHTTPProxy implements StockManager {
 	 * @return the replica address
 	 */
 	public String getReplicaAddress() {
-		throw new UnsupportedOperationException();
+		Random r = new Random();
+		int size = slaveAddresses.size();
+		List<String> s = new LinkedList<>();
+		s.addAll(slaveAddresses);
+		return s.get(r.nextInt(size));
 	}
 
 	/**
