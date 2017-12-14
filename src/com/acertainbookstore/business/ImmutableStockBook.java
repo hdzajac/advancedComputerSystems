@@ -1,7 +1,5 @@
 package com.acertainbookstore.business;
 
-import com.acertainbookstore.interfaces.StockManager;
-
 /**
  * {@link ImmutableStockBook} gets sent back to the {@link StockManager}. We do
  * not allow the {@link StockManager} to make any changes to the data structure.

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.BookRating;
-import com.acertainbookstore.business.MasterCertainBookStore;
 import com.acertainbookstore.utils.BookStoreException;
 import com.acertainbookstore.utils.BookStoreResult;
 

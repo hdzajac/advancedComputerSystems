@@ -2,7 +2,6 @@ package com.acertainbookstore.interfaces;
 
 import java.util.Set;
 
-import com.acertainbookstore.business.SlaveCertainBookStore;
 import com.acertainbookstore.utils.BookStoreException;
 import com.acertainbookstore.utils.BookStoreResult;
 
