@@ -72,7 +72,11 @@ public class ReplicationAwareServerHTTPProxy implements Replication {
 	/**
 	 * Stop.
 	 */
-	public void stop() throws Exception {
-		client.stop();
+	public void stop() {
+		try {
+			client.stop();
+		} catch (Exception ex) {
+			System.err.println(ex.getStackTrace());
+		}
 	}
 }

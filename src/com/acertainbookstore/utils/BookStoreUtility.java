@@ -144,7 +144,13 @@ public final class BookStoreUtility {
 		} catch (IllegalArgumentException | NullPointerException ex) {
 			// Enumeration type matching failed so non supported message or the
 			// request URI was empty.
-			System.err.println(ex.getStackTrace());
+			try {
+				return BookStoreMessageTag.valueOf(requestURI.substring(2).toUpperCase());
+
+			} catch(IllegalArgumentException | NullPointerException ex2)
+			{
+				ex2.printStackTrace();
+			}
 		}
 
 		return null;
