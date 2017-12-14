@@ -54,6 +54,15 @@ public final class BookStoreConstants {
 	/** The Constant NULL_INPUT. */
 	public static final String NULL_INPUT = "null input parameters";
 
+	/** The Constant KEY_MASTER. */
+	public static final String KEY_MASTER = "master";
+	
+	/** The Constant KEY_SLAVE. */
+	public static final String KEY_SLAVE = "slaves";
+	
+	/** The Constant SPLIT_SLAVE_REGEX. */
+	public static final String SPLIT_SLAVE_REGEX = ";";
+
 	/** The Constant PROPERTY_KEY_LOCAL_TEST. */
 	public static final String PROPERTY_KEY_LOCAL_TEST = "localtest";
 

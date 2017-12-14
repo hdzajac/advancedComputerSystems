@@ -17,8 +17,8 @@ import com.acertainbookstore.business.BookCopy;
 import com.acertainbookstore.business.CertainBookStore;
 import com.acertainbookstore.business.ImmutableStockBook;
 import com.acertainbookstore.business.StockBook;
-import com.acertainbookstore.client.BookStoreHTTPProxy;
-import com.acertainbookstore.client.StockManagerHTTPProxy;
+import com.acertainbookstore.client.ReplicationAwareBookStoreHTTPProxy;
+import com.acertainbookstore.client.ReplicationAwareStockManagerHTTPProxy;
 import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.StockManager;
 import com.acertainbookstore.utils.BookStoreConstants;
@@ -60,8 +60,8 @@ public class BookStoreTest {
 				storeManager = store;
 				client = store;
 			} else {
-				storeManager = new StockManagerHTTPProxy("http://localhost:8081/stock");
-				client = new BookStoreHTTPProxy("http://localhost:8081");
+				storeManager = new ReplicationAwareStockManagerHTTPProxy();
+				client = new ReplicationAwareBookStoreHTTPProxy();
 			}
 
 			storeManager.removeAllBooks();
@@ -360,8 +360,8 @@ public class BookStoreTest {
 		storeManager.removeAllBooks();
 
 		if (!localTest) {
-			((BookStoreHTTPProxy) client).stop();
-			((StockManagerHTTPProxy) storeManager).stop();
+			((ReplicationAwareBookStoreHTTPProxy) client).stop();
+			((ReplicationAwareStockManagerHTTPProxy) storeManager).stop();
 		}
 	}
 }

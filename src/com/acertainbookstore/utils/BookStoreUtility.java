@@ -1,6 +1,8 @@
 package com.acertainbookstore.utils;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -210,7 +212,7 @@ public final class BookStoreUtility {
 		if (exception != null) {
 			throw exception;
 		}
-
+		
 		return bookStoreResponse;
 	}
 }

@@ -1,9 +1,5 @@
 package com.acertainbookstore.utils;
 
-import java.util.List;
-
-import com.acertainbookstore.business.Book;
-
 /**
  * {@link BookStoreResponse} is the data structure that encapsulates a HTTP
  * response from the bookstore server to the client. The data structure contains
@@ -14,8 +10,8 @@ public class BookStoreResponse {
 	/** The exception. */
 	private BookStoreException exception;
 
-	/** The list. */
-	private List<?> list;
+	/** The result. */
+	private BookStoreResult result;
 
 	/**
 	 * Instantiates a new {@link BookStoreResponse}.
@@ -25,9 +21,9 @@ public class BookStoreResponse {
 	 * @param list
 	 *            the list
 	 */
-	public BookStoreResponse(BookStoreException exception, List<Book> list) {
+	public BookStoreResponse(BookStoreException exception, BookStoreResult result) {
 		this.setException(exception);
-		this.setList(list);
+		this.setResult(result);
 	}
 
 	/**
@@ -35,26 +31,26 @@ public class BookStoreResponse {
 	 */
 	public BookStoreResponse() {
 		this.setException(null);
-		this.setList(null);
+		this.setResult(null);
 	}
 
 	/**
-	 * Gets the list.
+	 * Gets the result.
 	 *
-	 * @return the list
+	 * @return the result
 	 */
-	public List<?> getList() {
-		return list;
+	public BookStoreResult getResult() {
+		return result;
 	}
 
 	/**
-	 * Sets the list.
+	 * Sets the result.
 	 *
-	 * @param list
-	 *            the new list
+	 * @param result
+	 *            the new result
 	 */
-	public void setList(List<?> list) {
-		this.list = list;
+	public void setResult(BookStoreResult result) {
+		this.result = result;
 	}
 
 	/**

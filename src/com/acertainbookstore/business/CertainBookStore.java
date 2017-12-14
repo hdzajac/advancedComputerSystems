@@ -362,7 +362,7 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<Book> getTopRatedBooks(int numBooks) throws BookStoreException {
-		throw new BookStoreException();
+		throw new BookStoreException("Not implemented");
 	}
 
 	/*
@@ -372,7 +372,7 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-		throw new BookStoreException();
+		throw new BookStoreException("Not implemented");
 	}
 
 	/*
@@ -382,7 +382,7 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized void rateBooks(Set<BookRating> bookRating) throws BookStoreException {
-		throw new BookStoreException();
+		throw new BookStoreException("Not implemented");
 	}
 
 	/*

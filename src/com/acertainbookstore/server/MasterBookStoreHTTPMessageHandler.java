@@ -8,13 +8,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.acertainbookstore.business.*;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import com.acertainbookstore.business.BookCopy;
-import com.acertainbookstore.business.BookEditorPick;
-import com.acertainbookstore.business.CertainBookStore;
-import com.acertainbookstore.business.StockBook;
 import com.acertainbookstore.utils.BookStoreKryoSerializer;
 import com.acertainbookstore.interfaces.BookStoreSerializer;
 import com.acertainbookstore.utils.BookStoreXStreamSerializer;
@@ -22,23 +19,24 @@ import com.acertainbookstore.utils.BookStoreConstants;
 import com.acertainbookstore.utils.BookStoreException;
 import com.acertainbookstore.utils.BookStoreMessageTag;
 import com.acertainbookstore.utils.BookStoreResponse;
+import com.acertainbookstore.utils.BookStoreResult;
 import com.acertainbookstore.utils.BookStoreUtility;
 import com.esotericsoftware.kryo.io.Input;
 
 /**
- * {@link BookStoreHTTPMessageHandler} implements the message handler class
- * which is invoked to handle messages received by the
- * {@link BookStoreHTTPServerUtility}. It decodes the HTTP message and invokes
- * the {@link CertainBookStore} server API.
+ * {@link MasterBookStoreHTTPMessageHandler} implements the message handler
+ * class which is invoked to handle messages received by the
+ * {@link MasterBookStoreHTTPServerUtility}. It decodes the HTTP message and
+ * invokes the {@link MasterCertainBookStore} server API.
  * 
  * @see AbstractHandler
  * @see BookStoreHTTPServerUtility
  * @see CertainBookStore
  */
-public class BookStoreHTTPMessageHandler extends AbstractHandler {
+public class MasterBookStoreHTTPMessageHandler extends AbstractHandler {
 
 	/** The book store. */
-	private CertainBookStore myBookStore = null;
+	private MasterCertainBookStore myBookStore = null;
 
 	/** The serializer. */
 	private static ThreadLocal<BookStoreSerializer> serializer;
@@ -49,7 +47,7 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	 * @param bookStore
 	 *            the book store
 	 */
-	public BookStoreHTTPMessageHandler(CertainBookStore bookStore) {
+	public MasterBookStoreHTTPMessageHandler(MasterCertainBookStore bookStore) {
 		myBookStore = bookStore;
 
 		// Setup the type of serializer.
@@ -157,7 +155,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			bookStoreResponse.setList(myBookStore.getBooksByISBN(isbnSet));
+			BookStoreResult bookStoreResult = myBookStore.getBooksByISBN(isbnSet);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -182,7 +181,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 
 		try {
 			int numBooks = BookStoreUtility.convertStringToInt(numBooksString);
-			bookStoreResponse.setList(myBookStore.getEditorPicks(numBooks));
+			BookStoreResult bookStoreResult = myBookStore.getEditorPicks(numBooks);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -209,7 +209,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			bookStoreResponse.setList(myBookStore.getBooks(isbnSet));
+			BookStoreResult bookStoreResult = myBookStore.getBooks(isbnSet);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -236,7 +237,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.buyBooks(bookCopiesToBuy);
+			BookStoreResult bookStoreResult = myBookStore.buyBooks(bookCopiesToBuy);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -264,7 +266,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.updateEditorPicks(mapEditorPicksValues);
+			BookStoreResult bookStoreResult = myBookStore.updateEditorPicks(mapEditorPicksValues);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -283,7 +286,13 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	 */
 	private void listBooks(HttpServletResponse response) throws IOException {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
-		bookStoreResponse.setList(myBookStore.getBooks());
+
+		try {
+			BookStoreResult bookStoreResult = myBookStore.getBooks();
+			bookStoreResponse.setResult(bookStoreResult);
+		} catch (BookStoreException e) {
+			bookStoreResponse.setException(e);
+		}
 
 		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
 		response.getOutputStream().write(serializedResponseContent);
@@ -307,7 +316,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.addCopies(listBookCopies);
+			BookStoreResult bookStoreResult = myBookStore.addCopies(listBookCopies);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -334,7 +344,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.addBooks(newBooks);
+			BookStoreResult bookStoreResult = myBookStore.addBooks(newBooks);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -355,7 +366,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.removeAllBooks();
+			BookStoreResult bookStoreResult = myBookStore.removeAllBooks();
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -382,7 +394,8 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
 		try {
-			myBookStore.removeBooks(bookSet);
+			BookStoreResult bookStoreResult = myBookStore.removeBooks(bookSet);
+			bookStoreResponse.setResult(bookStoreResult);
 		} catch (BookStoreException ex) {
 			bookStoreResponse.setException(ex);
 		}
@@ -394,9 +407,11 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 	/**
 	 * Gets the serialized request content.
 	 *
-	 * @param request the request
+	 * @param request
+	 *            the request
 	 * @return the serialized request content
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	private byte[] getSerializedRequestContent(HttpServletRequest request) throws IOException {
 		Input in = new Input(request.getInputStream());
