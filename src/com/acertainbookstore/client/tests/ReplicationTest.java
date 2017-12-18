@@ -117,19 +117,6 @@ public class ReplicationTest {
                 false);
     }
 
-    /**
-     * Method to add a book, executed before every test case is run.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @Before
-    public void initializeBooks() throws BookStoreException {
-        Set<StockBook> booksToAdd = new HashSet<StockBook>();
-        booksToAdd.add(getDefaultBook());
-
-        storeManager.addBooks(booksToAdd);
-    }
 
 
     @Test
@@ -139,7 +126,10 @@ public class ReplicationTest {
 
         String url = slave + "/" + BookStoreMessageTag.DIE;
         BookStoreRequest bookStoreRequest = BookStoreRequest.newGetRequest(url);
-        BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+        BookStoreResponse response = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+
+        assertTrue(response.getResult().getList().size() == 0);
+        assertTrue(response.getResult().getSnapshotId() == -1);
 
         Set<StockBook> booksToAdd = new HashSet<StockBook>();
         booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
@@ -160,53 +150,6 @@ public class ReplicationTest {
 
     }
 
-    /**
-     * Method to clean up the book store, execute after every test case is run.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @After
-    public void cleanupBooks() throws BookStoreException {
-        storeManager.removeAllBooks();
-    }
-
-    /**
-     * Checks whether the insertion of a books with initialize books worked.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @Test
-    public void testInitializeBooks() throws BookStoreException {
-        List<StockBook> addedBooks = new ArrayList<StockBook>();
-        addedBooks.add(getDefaultBook());
-
-        List<StockBook> listBooks = null;
-        listBooks = storeManager.getBooks();
-
-        assertTrue(addedBooks.containsAll(listBooks) && addedBooks.size() == listBooks.size());
-    }
-
-
-
-
-    /**
-     * Tear down after class.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @AfterClass
-    public static void tearDownAfterClass() throws BookStoreException {
-        storeManager.removeAllBooks();
-
-        if (!localTest) {
-            ((ReplicationAwareBookStoreHTTPProxy) bookStoreClient).stop();
-            ((ReplicationAwareStockManagerHTTPProxy) storeManager).stop();
-        }
-
-    }
 
     /**
      * Initialize replication aware mappings.
@@ -246,15 +189,5 @@ public class ReplicationTest {
             slaveAddresses.add(slave);
         }
     }
-
-    /**
-     * Gets the master server address.
-     *
-     * @return the master server address
-     */
-    private String getMasterServerAddress() {
-        return masterAddress;
-    }
-
 
 }

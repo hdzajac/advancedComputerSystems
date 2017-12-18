@@ -232,10 +232,14 @@ public class ReplicationAwareStockManagerHTTPProxy implements StockManager {
 		BookStoreResult bookStoreResult;
 
 		do {
-			String urlString = getReplicaAddress() + "/" + BookStoreMessageTag.GETSTOCKBOOKSBYISBN;
-			BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, isbns);
-			bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
-			bookStoreResult = bookStoreResponse.getResult();
+			try {
+				String urlString = getReplicaAddress() + "/" + BookStoreMessageTag.GETSTOCKBOOKSBYISBN;
+				BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, isbns);
+				bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+				bookStoreResult = bookStoreResponse.getResult();
+			} catch (BookStoreException e){
+				bookStoreResult = new BookStoreResult(new LinkedList<>(), -1);
+			}
 		} while (bookStoreResult.getSnapshotId() < this.getSnapshotId());
 
 		this.setSnapshotId(bookStoreResult.getSnapshotId());

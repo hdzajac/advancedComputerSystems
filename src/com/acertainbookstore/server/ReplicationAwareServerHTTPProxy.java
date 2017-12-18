@@ -3,6 +3,7 @@ package com.acertainbookstore.server;
 import com.acertainbookstore.business.ReplicationRequest;
 import com.acertainbookstore.business.ReplicationResult;
 import com.acertainbookstore.client.BookStoreClientConstants;
+import com.acertainbookstore.interfaces.BookStore;
 import com.acertainbookstore.interfaces.BookStoreSerializer;
 import com.acertainbookstore.interfaces.Replication;
 import com.acertainbookstore.utils.*;
@@ -62,7 +63,12 @@ public class ReplicationAwareServerHTTPProxy implements Replication {
 	public ReplicationResult replicate(ReplicationRequest req) throws BookStoreException {
 		String urlString = destinationServerAddress + "/" + req.getMessageType();
 		BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, req.getDataSet());
-		BookStoreResponse response = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+		BookStoreResponse response;
+		try {
+			response = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+		} catch (BookStoreException e){
+			return new ReplicationResult(destinationServerAddress,false);
+		}
 		if (response.getException() == null)
 			return new ReplicationResult(destinationServerAddress,true);
 		else

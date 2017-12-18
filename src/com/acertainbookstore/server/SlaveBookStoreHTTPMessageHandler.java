@@ -3,6 +3,7 @@ package com.acertainbookstore.server;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.LinkedList;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -129,9 +130,13 @@ public class SlaveBookStoreHTTPMessageHandler extends AbstractHandler {
 			case GETSTOCKBOOKSBYISBN:
 				getStockBooksByISBN(request, response);
 				break;
+
 			case DIE:
+				handleDying(request, response);
+				System.out.println("Goodbye cruel world");
 				System.exit(1);
 				break;
+
 			default:
 				System.err.println("Unsupported message tag.");
 				break;
@@ -142,9 +147,17 @@ public class SlaveBookStoreHTTPMessageHandler extends AbstractHandler {
 		baseRequest.setHandled(true);
 	}
 
-	
-		
-	
+	private void handleDying(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+		BookStoreResult bookStoreResult = new BookStoreResult(new LinkedList<>(), -1);
+		bookStoreResponse.setResult(bookStoreResult);
+		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+		response.getOutputStream().write(serializedResponseContent);
+		response.flushBuffer();
+		response.getOutputStream().close();
+	}
+
+
 	private void replicateHandler(HttpServletRequest request, HttpServletResponse response, BookStoreMessageTag messageTag) throws IOException {
 		byte[] serializedRequestContent = getSerializedRequestContent(request);
 		Set<?> dataSet = (Set<?>) serializer.get().deserialize(serializedRequestContent);
