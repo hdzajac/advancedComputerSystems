@@ -25,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.assertTrue;
 
-public class ReplicationTest {
+public class ReplicationSlaveReadTest {
 
     /** The Constant TEST_ISBN. */
     private static final Integer TEST_ISBN = 30345650;
