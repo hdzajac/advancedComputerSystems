@@ -31,395 +31,371 @@ import com.esotericsoftware.kryo.io.Input;
  * class which is invoked to handle messages received by the
  * {@link MasterBookStoreHTTPServerUtility}. It decodes the HTTP message and
  * invokes the {@link MasterCertainBookStore} server API.
- * 
+ *
  * @see AbstractHandler
  * @see BookStoreHTTPServerUtility
  * @see CertainBookStore
  */
 public class MasterBookStoreHTTPMessageHandler extends AbstractHandler {
 
-	/** The book store. */
-	private MasterCertainBookStore myBookStore = null;
+    /**
+     * The book store.
+     */
+    private MasterCertainBookStore myBookStore = null;
 
-	/** The serializer. */
-	private static ThreadLocal<BookStoreSerializer> serializer;
+    /**
+     * The serializer.
+     */
+    private static ThreadLocal<BookStoreSerializer> serializer;
 
-	/**
-	 * Instantiates a new {@link BookStoreHTTPMessageHandler}.
-	 *
-	 * @param bookStore
-	 *            the book store
-	 */
-	public MasterBookStoreHTTPMessageHandler(MasterCertainBookStore bookStore) {
-		myBookStore = bookStore;
+    /**
+     * Instantiates a new {@link BookStoreHTTPMessageHandler}.
+     *
+     * @param bookStore the book store
+     */
+    public MasterBookStoreHTTPMessageHandler(MasterCertainBookStore bookStore) {
+        myBookStore = bookStore;
 
-		// Setup the type of serializer.
-		if (BookStoreConstants.BINARY_SERIALIZATION) {
-			serializer = ThreadLocal.withInitial(BookStoreKryoSerializer::new);
-		} else {
-			serializer = ThreadLocal.withInitial(BookStoreXStreamSerializer::new);
-		}
-	}
+        // Setup the type of serializer.
+        if (BookStoreConstants.BINARY_SERIALIZATION) {
+            serializer = ThreadLocal.withInitial(BookStoreKryoSerializer::new);
+        } else {
+            serializer = ThreadLocal.withInitial(BookStoreXStreamSerializer::new);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jetty.server.Handler#handle(java.lang.String,
-	 * org.eclipse.jetty.server.Request, javax.servlet.http.HttpServletRequest,
-	 * javax.servlet.http.HttpServletResponse)
-	 */
-	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
-		BookStoreMessageTag messageTag;
-		String requestURI;
+    /*
+     * (non-Javadoc)
+     *
+     * @see org.eclipse.jetty.server.Handler#handle(java.lang.String,
+     * org.eclipse.jetty.server.Request, javax.servlet.http.HttpServletRequest,
+     * javax.servlet.http.HttpServletResponse)
+     */
+    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
+        BookStoreMessageTag messageTag;
+        String requestURI;
 
-		response.setStatus(HttpServletResponse.SC_OK);
-		requestURI = request.getRequestURI();
+        response.setStatus(HttpServletResponse.SC_OK);
+        requestURI = request.getRequestURI();
 
-		// Need to do request multiplexing
-		if (!BookStoreUtility.isEmpty(requestURI) && requestURI.toLowerCase().startsWith("/stock")) {
-			// The request is from the store manager; more sophisticated.
-			// security features could be added here.
-			messageTag = BookStoreUtility.convertURItoMessageTag(requestURI.substring(6));
-		} else {
-			messageTag = BookStoreUtility.convertURItoMessageTag(requestURI);
-		}
+        // Need to do request multiplexing
+        if (!BookStoreUtility.isEmpty(requestURI) && requestURI.toLowerCase().startsWith("/stock")) {
+            // The request is from the store manager; more sophisticated.
+            // security features could be added here.
+            messageTag = BookStoreUtility.convertURItoMessageTag(requestURI.substring(6));
+        } else {
+            messageTag = BookStoreUtility.convertURItoMessageTag(requestURI);
+        }
 
-		// The RequestURI before the switch.
-		if (messageTag == null) {
-			System.err.println("No message tag.");
-		} else {
-			switch (messageTag) {
-			case REMOVEBOOKS:
-				removeBooks(request, response);
-				break;
+        // The RequestURI before the switch.
+        if (messageTag == null) {
+            System.err.println("No message tag.");
+        } else {
+            switch (messageTag) {
+                case REMOVEBOOKS:
+                    removeBooks(request, response);
+                    break;
 
-			case REMOVEALLBOOKS:
-				removeAllBooks(response);
-				break;
+                case REMOVEALLBOOKS:
+                    removeAllBooks(response);
+                    break;
 
-			case ADDBOOKS:
-				addBooks(request, response);
-				break;
+                case ADDBOOKS:
+                    addBooks(request, response);
+                    break;
 
-			case ADDCOPIES:
-				addCopies(request, response);
-				break;
+                case ADDCOPIES:
+                    addCopies(request, response);
+                    break;
 
-			case LISTBOOKS:
-				listBooks(response);
-				break;
+                case LISTBOOKS:
+                    listBooks(response);
+                    break;
 
-			case UPDATEEDITORPICKS:
-				updateEditorPicks(request, response);
-				break;
+                case UPDATEEDITORPICKS:
+                    updateEditorPicks(request, response);
+                    break;
 
-			case BUYBOOKS:
-				buyBooks(request, response);
-				break;
+                case BUYBOOKS:
+                    buyBooks(request, response);
+                    break;
 
-			case GETBOOKS:
-				getBooks(request, response);
-				break;
+                case GETBOOKS:
+                    getBooks(request, response);
+                    break;
 
-			case GETEDITORPICKS:
-				getEditorPicks(request, response);
-				break;
+                case GETEDITORPICKS:
+                    getEditorPicks(request, response);
+                    break;
 
-			case GETSTOCKBOOKSBYISBN:
-				getStockBooksByISBN(request, response);
-				break;
+                case GETSTOCKBOOKSBYISBN:
+                    getStockBooksByISBN(request, response);
+                    break;
 
-			default:
-				System.err.println("Unsupported message tag.");
-				break;
-			}
-		}
+                case DIE:
+                    System.exit(1);
 
-		// Mark the request as handled so that the HTTP response can be sent
-		baseRequest.setHandled(true);
-	}
+                default:
+                    System.err.println("Unsupported message tag.");
+                    break;
+            }
+        }
 
-	/**
-	 * Gets the stock books by ISBN.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void getStockBooksByISBN(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        // Mark the request as handled so that the HTTP response can be sent
+        baseRequest.setHandled(true);
+    }
 
-		Set<Integer> isbnSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Gets the stock books by ISBN.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void getStockBooksByISBN(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.getBooksByISBN(isbnSet);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<Integer> isbnSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.getBooksByISBN(isbnSet);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Gets the editor picks.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void getEditorPicks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String numBooksString = URLDecoder.decode(request.getParameter(BookStoreConstants.BOOK_NUM_PARAM), "UTF-8");
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		try {
-			int numBooks = BookStoreUtility.convertStringToInt(numBooksString);
-			BookStoreResult bookStoreResult = myBookStore.getEditorPicks(numBooks);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+    /**
+     * Gets the editor picks.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private void getEditorPicks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String numBooksString = URLDecoder.decode(request.getParameter(BookStoreConstants.BOOK_NUM_PARAM), "UTF-8");
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            int numBooks = BookStoreUtility.convertStringToInt(numBooksString);
+            BookStoreResult bookStoreResult = myBookStore.getEditorPicks(numBooks);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Gets the books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void getBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<Integer> isbnSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Gets the books.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void getBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.getBooks(isbnSet);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<Integer> isbnSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.getBooks(isbnSet);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Buys books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void buyBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<BookCopy> bookCopiesToBuy = (Set<BookCopy>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Buys books.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void buyBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.buyBooks(bookCopiesToBuy);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<BookCopy> bookCopiesToBuy = (Set<BookCopy>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.buyBooks(bookCopiesToBuy);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Updates editor picks.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void updateEditorPicks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<BookEditorPick> mapEditorPicksValues = (Set<BookEditorPick>) serializer.get()
-				.deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Updates editor picks.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void updateEditorPicks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.updateEditorPicks(mapEditorPicksValues);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<BookEditorPick> mapEditorPicksValues = (Set<BookEditorPick>) serializer.get()
+                .deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.updateEditorPicks(mapEditorPicksValues);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Lists the books.
-	 *
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void listBooks(HttpServletResponse response) throws IOException {
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.getBooks();
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException e) {
-			bookStoreResponse.setException(e);
-		}
+    /**
+     * Lists the books.
+     *
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private void listBooks(HttpServletResponse response) throws IOException {
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.getBooks();
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException e) {
+            bookStoreResponse.setException(e);
+        }
 
-	/**
-	 * Adds the copies.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void addCopies(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<BookCopy> listBookCopies = (Set<BookCopy>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Adds the copies.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void addCopies(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.addCopies(listBookCopies);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<BookCopy> listBookCopies = (Set<BookCopy>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.addCopies(listBookCopies);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Adds the books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void addBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<StockBook> newBooks = (Set<StockBook>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Adds the books.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void addBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.addBooks(newBooks);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<StockBook> newBooks = (Set<StockBook>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.addBooks(newBooks);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Removes all books.
-	 *
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private void removeAllBooks(HttpServletResponse response) throws IOException {
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.removeAllBooks();
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+    /**
+     * Removes all books.
+     *
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private void removeAllBooks(HttpServletResponse response) throws IOException {
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.removeAllBooks();
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Removes the books.
-	 *
-	 * @param request
-	 *            the request
-	 * @param response
-	 *            the response
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	@SuppressWarnings("unchecked")
-	private void removeBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		byte[] serializedRequestContent = getSerializedRequestContent(request);
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
 
-		Set<Integer> bookSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
-		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+    /**
+     * Removes the books.
+     *
+     * @param request  the request
+     * @param response the response
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    @SuppressWarnings("unchecked")
+    private void removeBooks(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        byte[] serializedRequestContent = getSerializedRequestContent(request);
 
-		try {
-			BookStoreResult bookStoreResult = myBookStore.removeBooks(bookSet);
-			bookStoreResponse.setResult(bookStoreResult);
-		} catch (BookStoreException ex) {
-			bookStoreResponse.setException(ex);
-		}
+        Set<Integer> bookSet = (Set<Integer>) serializer.get().deserialize(serializedRequestContent);
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
 
-		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
-		response.getOutputStream().write(serializedResponseContent);
-	}
+        try {
+            BookStoreResult bookStoreResult = myBookStore.removeBooks(bookSet);
+            bookStoreResponse.setResult(bookStoreResult);
+        } catch (BookStoreException ex) {
+            bookStoreResponse.setException(ex);
+        }
 
-	/**
-	 * Gets the serialized request content.
-	 *
-	 * @param request
-	 *            the request
-	 * @return the serialized request content
-	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
-	 */
-	private byte[] getSerializedRequestContent(HttpServletRequest request) throws IOException {
-		Input in = new Input(request.getInputStream());
-		byte[] serializedRequestContent = in.readBytes(request.getContentLength());
-		in.close();
-		return serializedRequestContent;
-	}
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+    }
+
+    /**
+     * Gets the serialized request content.
+     *
+     * @param request the request
+     * @return the serialized request content
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    private byte[] getSerializedRequestContent(HttpServletRequest request) throws IOException {
+        Input in = new Input(request.getInputStream());
+        byte[] serializedRequestContent = in.readBytes(request.getContentLength());
+        in.close();
+        return serializedRequestContent;
+    }
 }
