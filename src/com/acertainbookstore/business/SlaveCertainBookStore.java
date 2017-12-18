@@ -73,6 +73,10 @@ public class SlaveCertainBookStore extends ReadOnlyCertainBookStore
 			case REMOVEBOOKS:
 				replRes = removeBooks(req);
 				break;
+			case DIE:
+				System.exit(1);
+
+			break;
 
 			default:
 				System.err.println("Unsupported message tag.");

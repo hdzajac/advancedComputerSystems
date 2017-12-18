@@ -14,10 +14,14 @@ import com.acertainbookstore.utils.*;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.*;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -125,6 +129,35 @@ public class ReplicationTest {
         booksToAdd.add(getDefaultBook());
 
         storeManager.addBooks(booksToAdd);
+    }
+
+
+    @Test
+    public void testFailSlave() throws BookStoreException, InterruptedException, ExecutionException, TimeoutException {
+        Iterator iter = slaveAddresses.iterator();
+        String slave = iter.next().toString();
+
+        String url = slave + "/" + BookStoreMessageTag.DIE;
+        BookStoreRequest bookStoreRequest = BookStoreRequest.newGetRequest(url);
+        BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
+
+        Set<StockBook> booksToAdd = new HashSet<StockBook>();
+        booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+                (float) 300, NUM_COPIES, 0, 0, 0, false));
+        booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+                "Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+        storeManager.addBooks(booksToAdd);
+
+        Set<Integer> isbnSet = new HashSet<Integer>();
+        isbnSet.add(TEST_ISBN + 1);
+        isbnSet.add(TEST_ISBN + 2);
+
+        List<StockBook> listBooks = storeManager.getBooksByISBN(isbnSet);
+        Assert.assertTrue(booksToAdd.containsAll(listBooks) && booksToAdd.size() == listBooks.size());
+       // Result result = JUnitCore.runClasses(com.acertainbookstore.client.tests.BookStoreTest.class);
+       // Assert.assertTrue(result.wasSuccessful());
+
+
     }
 
     /**

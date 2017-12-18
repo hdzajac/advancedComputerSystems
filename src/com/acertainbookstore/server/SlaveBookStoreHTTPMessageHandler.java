@@ -129,7 +129,9 @@ public class SlaveBookStoreHTTPMessageHandler extends AbstractHandler {
 			case GETSTOCKBOOKSBYISBN:
 				getStockBooksByISBN(request, response);
 				break;
-
+			case DIE:
+				System.exit(1);
+				break;
 			default:
 				System.err.println("Unsupported message tag.");
 				break;
