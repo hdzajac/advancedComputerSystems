@@ -292,33 +292,7 @@ public class BookStoreTest {
 		assertTrue(listBooks.containsAll(booksAdded) && listBooks.size() == booksAdded.size());
 	}
 
-	/**
-	 * Tests that a list of books with a certain feature can be retrieved.
-	 *
-	 * @throws BookStoreException
-	 *             the book store exception
-	 */
-	@Test
-	public void testGetCertainBooks() throws BookStoreException {
-		Set<StockBook> booksToAdd = new HashSet<StockBook>();
-		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
-				(float) 300, NUM_COPIES, 0, 0, 0, false));
-		booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
-				"Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
 
-		storeManager.addBooks(booksToAdd);
-
-		// Get a list of ISBNs to retrieved.
-		Set<Integer> isbnList = new HashSet<Integer>();
-		isbnList.add(TEST_ISBN + 1);
-		isbnList.add(TEST_ISBN + 2);
-
-		// Get books with that ISBN.
-		List<Book> books = client.getBooks(isbnList);
-
-		// Make sure the lists equal each other
-		assertTrue(books.containsAll(booksToAdd) && books.size() == booksToAdd.size());
-	}
 
 	/**
 	 * Tests that books cannot be retrieved if ISBN is invalid.
