@@ -127,52 +127,42 @@ public class ReplicationTest {
         storeManager.addBooks(booksToAdd);
     }
 
-    /**
-     * Method to clean up the book store, execute after every test case is run.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @After
-    public void cleanupBooks() throws BookStoreException {
-        storeManager.removeAllBooks();
-    }
 
     /**
-     * Checks whether the insertion of a books with initialize books worked.
+     * Checks whether writing is not possible after master server fail
      *
-     * @throws BookStoreException
-     *             the book store exception
+     * Master server after receiving DIE request, responds with an empty list and snapshot id == -1
+     * and dies immediately afterwards.
+     *
+     * After checking for those values in the response the second part of the test is run:
+     *      Testing for successful read.
      */
     @Test
-    public void testInitializeBooks() throws BookStoreException {
-        List<StockBook> addedBooks = new ArrayList<StockBook>();
-        addedBooks.add(getDefaultBook());
+    public void testFailedMaster() {
+        String urlString = getMasterServerAddress() + "/" + BookStoreMessageTag.DIE;
+        BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, "bye bye");
+        BookStoreResponse bookStoreResponse;
+        try {
+            bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest,
+                    serializer.get());
+            BookStoreResult bookStoreResult = bookStoreResponse.getResult();
 
-        List<StockBook> listBooks = null;
-        listBooks = storeManager.getBooks();
+            assertTrue(bookStoreResult.getSnapshotId() == -1);
+            assertTrue(bookStoreResult.getList().isEmpty());
 
-        assertTrue(addedBooks.containsAll(listBooks) && addedBooks.size() == listBooks.size());
-    }
+            List<StockBook> receivedBooks  = storeManager.getBooks();
 
+            assertTrue(receivedBooks.size() == 1);
 
+            StockBook book = getDefaultBook();
+            List<StockBook> booksThatShouldBeThere = new LinkedList<>();
+            booksThatShouldBeThere.add(book);
 
+            assertTrue(receivedBooks.containsAll(booksThatShouldBeThere));
 
-    /**
-     * Tear down after class.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @AfterClass
-    public static void tearDownAfterClass() throws BookStoreException {
-        storeManager.removeAllBooks();
-
-        if (!localTest) {
-            ((ReplicationAwareBookStoreHTTPProxy) bookStoreClient).stop();
-            ((ReplicationAwareStockManagerHTTPProxy) storeManager).stop();
+        } catch (BookStoreException e) {
+            e.printStackTrace();
         }
-
     }
 
     /**

@@ -2,6 +2,7 @@ package com.acertainbookstore.server;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.LinkedList;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -134,7 +135,15 @@ public class MasterBookStoreHTTPMessageHandler extends AbstractHandler {
                     break;
 
                 case DIE:
-                    System.exit(1);
+                    handleDying(request, response);
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    System.exit(0);
+                    break;
+
 
                 default:
                     System.err.println("Unsupported message tag.");
@@ -144,6 +153,17 @@ public class MasterBookStoreHTTPMessageHandler extends AbstractHandler {
 
         // Mark the request as handled so that the HTTP response can be sent
         baseRequest.setHandled(true);
+    }
+
+    private void handleDying(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BookStoreResponse bookStoreResponse = new BookStoreResponse();
+        bookStoreResponse.setResult(new BookStoreResult(new LinkedList<>(), -1));
+        byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+        response.getOutputStream().write(serializedResponseContent);
+        response.flushBuffer();
+        response.getOutputStream().close();
+
+        System.out.print("Goodbye cruel world");
     }
 
     /**
