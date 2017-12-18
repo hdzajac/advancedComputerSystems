@@ -14,14 +14,18 @@ import com.acertainbookstore.utils.*;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.junit.*;
+import org.junit.runner.JUnitCore;
+import org.junit.runner.Result;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.assertTrue;
 
-public class ReplicationTest {
+public class ReplicationSlaveReadTest {
 
     /** The Constant TEST_ISBN. */
     private static final Integer TEST_ISBN = 30345650;
@@ -113,57 +117,39 @@ public class ReplicationTest {
                 false);
     }
 
-    /**
-     * Method to add a book, executed before every test case is run.
-     *
-     * @throws BookStoreException
-     *             the book store exception
-     */
-    @Before
-    public void initializeBooks() throws BookStoreException {
-        Set<StockBook> booksToAdd = new HashSet<StockBook>();
-        booksToAdd.add(getDefaultBook());
-
-        storeManager.addBooks(booksToAdd);
-    }
 
 
-    /**
-     * Checks whether writing is not possible after master server fail
-     *
-     * Master server after receiving DIE request, responds with an empty list and snapshot id == -1
-     * and dies immediately afterwards.
-     *
-     * After checking for those values in the response the second part of the test is run:
-     *      Testing for successful read.
-     */
     @Test
-    public void testFailedMaster() {
-        String urlString = getMasterServerAddress() + "/" + BookStoreMessageTag.DIE;
-        BookStoreRequest bookStoreRequest = BookStoreRequest.newPostRequest(urlString, "bye bye");
-        BookStoreResponse bookStoreResponse;
-        try {
-            bookStoreResponse = BookStoreUtility.performHttpExchange(client, bookStoreRequest,
-                    serializer.get());
-            BookStoreResult bookStoreResult = bookStoreResponse.getResult();
+    public void testFailSlave() throws BookStoreException, InterruptedException, ExecutionException, TimeoutException {
+        Iterator iter = slaveAddresses.iterator();
+        String slave = iter.next().toString();
 
-            assertTrue(bookStoreResult.getSnapshotId() == -1);
-            assertTrue(bookStoreResult.getList().isEmpty());
+        String url = slave + "/" + BookStoreMessageTag.DIE;
+        BookStoreRequest bookStoreRequest = BookStoreRequest.newGetRequest(url);
+        BookStoreResponse response = BookStoreUtility.performHttpExchange(client, bookStoreRequest, serializer.get());
 
-            List<StockBook> receivedBooks  = storeManager.getBooks();
+        assertTrue(response.getResult().getList().size() == 0);
+        assertTrue(response.getResult().getSnapshotId() == -1);
 
-            assertTrue(receivedBooks.size() == 1);
+        Set<StockBook> booksToAdd = new HashSet<StockBook>();
+        booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 1, "The Art of Computer Programming", "Donald Knuth",
+                (float) 300, NUM_COPIES, 0, 0, 0, false));
+        booksToAdd.add(new ImmutableStockBook(TEST_ISBN + 2, "The C Programming Language",
+                "Dennis Ritchie and Brian Kerninghan", (float) 50, NUM_COPIES, 0, 0, 0, false));
+        storeManager.addBooks(booksToAdd);
 
-            StockBook book = getDefaultBook();
-            List<StockBook> booksThatShouldBeThere = new LinkedList<>();
-            booksThatShouldBeThere.add(book);
+        Set<Integer> isbnSet = new HashSet<Integer>();
+        isbnSet.add(TEST_ISBN + 1);
+        isbnSet.add(TEST_ISBN + 2);
 
-            assertTrue(receivedBooks.containsAll(booksThatShouldBeThere));
+        List<StockBook> listBooks = storeManager.getBooksByISBN(isbnSet);
+        Assert.assertTrue(booksToAdd.containsAll(listBooks) && booksToAdd.size() == listBooks.size());
+        // Result result = JUnitCore.runClasses(com.acertainbookstore.client.tests.BookStoreTest.class);
+        // Assert.assertTrue(result.wasSuccessful());
 
-        } catch (BookStoreException e) {
-            e.printStackTrace();
-        }
+
     }
+
 
     /**
      * Initialize replication aware mappings.
@@ -203,15 +189,5 @@ public class ReplicationTest {
             slaveAddresses.add(slave);
         }
     }
-
-    /**
-     * Gets the master server address.
-     *
-     * @return the master server address
-     */
-    private String getMasterServerAddress() {
-        return masterAddress;
-    }
-
 
 }
